@@ -1,0 +1,14 @@
+    1  sudo apt update; sudo apt upgrade
+    2  pwd
+    3  cd ~/Desktop
+    4  ls -latr; mkdir cs149; cd cs149
+    5  git init
+    6  git remote add-origin https://ciyer17-admin@bitbucket.org/ciyer17/cs149.git
+    7  git config --global user.email "chandramouli.iyer@sjsu.edu"
+    8  git config --global user.name "Chandramouli Iyer"
+    9  mkdir WS1
+   10  cd WS1/
+   11  git add .
+   12  wget -O out.pdf https://tinyurl.com/yy94jltt
+   13  ls -latr
+   14  history > cmds.log
