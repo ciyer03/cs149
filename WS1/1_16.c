@@ -11,6 +11,6 @@
 // This is the main function. prints out the desired output.
 int main(int argc, char *argv[])
 {
-    printf("  NO PARKING\n2:00 - 6:00 a.m.");
+    printf("  NO PARKING\n2:00 - 6:00 a.m.\n");
     return 0;
 }
