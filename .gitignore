@@ -8,7 +8,10 @@ node_modules/
 dist/
 
 # Compiled object files
-*.o[ut]
+*.o
+
+# Compiled object files
+*.out
 
 # Compiled Java class files
 *.class

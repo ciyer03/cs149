@@ -11,6 +11,7 @@
  **/
 
 #include <stdio.h>
+#include <stdlib.h>
 
 // Function prototypes. See the function declarations for more information.
 void zeroOut(int*, int, int);
@@ -33,18 +34,43 @@ int main(int argc, char *argv[])
 {
     // Checks if there are exactly four arguments (3 files, and 1 default).
     if (argc != 4) {
-        printf("Supply exactly 3 files as arguments.\n");
+        printf("error: expecting exactly 3 files as input\n");
+        printf("Terminating, exit code 1.\n");
         return 1;
     }
 
-    int A[3]; // Matrix of size 1x3. The input matrix.
-    int W[3][5]; // Matrix of size 3x5 The weights matrix.
+    // Create FILE pointers for the given files, and open in read mode.
+    FILE *A = fopen(argv[1], "r");
+    FILE *W = fopen(argv[2], "r");
+    FILE *B = fopen(argv[3], "r");
+
+    // Check for invalid inputs and exit if found.
+    if (A == NULL || W == NULL || B == NULL) {
+        if (A == NULL) {
+            printf("error: cannot open file %s\n", argv[1]);
+        }
+        
+        if (W == NULL) {
+            printf("error: cannot open file %s\n", argv[2]);
+        }
+
+        if (B == NULL) {
+            printf("error: cannot open file %s\n", argv[3]);
+        }
+
+        printf("Terminating, exit code 1.\n");
+        return 1; 
+    }
+
+    int input[3]; // Matrix of size 1x3. The input matrix.
+    int weights[3][5]; // Matrix of size 3x5 The weights matrix.
     int product[5]; // Matrix of size 1x5. Stores the dot product of A and W.
-    int B[5]; // Matrix of size 1x5. The bias matrix.
+    int bias[5]; // Matrix of size 1x5. The bias matrix.
     int resultant[5]; // Matrix of size 1x5. Stores the resultant matrix.
 
-
-
+    fclose(A);
+    fclose(W);
+    fclose(B);
     return 0;
 }
 
@@ -87,7 +113,7 @@ void zeroOut(int *matrix, int rows, int columns) {
     // Iterate through the memory length (determined by product).
     for (int i = 0; i < product; ++i) {
         *(matrix) = 0; // Dereference the pointer, and zero it out.
-        
+
         // Increment the memory address by one. The compiler will determine 
         // the correct step for the memory address depending on the amount of space 
         // allocated for an integer on that specific machine.
