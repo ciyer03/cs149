@@ -12,11 +12,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <strings.h>
 
 // Function prototypes. See the function declarations for more information.
-void zeroOut(int*, int, int);
-void fillMatrix(int*, int, int, FILE);
-void dotProduct(int*, int*, int*);
+void zeroOut(int *matrix, int rows, int columns);
+void fillMatrix(int* matrix, int rows, int columns, FILE *file);
+void dotProduct(int* matrix1, int* matrix2, int* product);
+void printArr(int *matrix, int product);
 
 /**
  * Executes the program. Accepts command line parameters.
@@ -49,7 +52,7 @@ int main(int argc, char *argv[])
         if (A == NULL) {
             printf("error: cannot open file %s\n", argv[1]);
         }
-        
+
         if (W == NULL) {
             printf("error: cannot open file %s\n", argv[2]);
         }
@@ -64,10 +67,28 @@ int main(int argc, char *argv[])
 
     int input[3]; // Matrix of size 1x3. The input matrix.
     int weights[3][5]; // Matrix of size 3x5 The weights matrix.
-    int product[5]; // Matrix of size 1x5. Stores the dot product of A and W.
     int bias[5]; // Matrix of size 1x5. The bias matrix.
+
+    zeroOut(input, 0, 3);
+    zeroOut(&(weights[0][0]), 3, 5);
+    zeroOut(bias, 0, 5);
+
+    printArr(input, 3);
+    printArr(&(weights[0][0]), 15);
+    printArr(bias, 5);
+
+    fillMatrix(input, 0, 3, A);
+    fillMatrix(&(weights[0][0]), 3, 5, W);
+    fillMatrix(bias, 0, 5, B);
+
+    printArr(input, 3);
+    printArr(&(weights[0][0]), 15);
+    printArr(bias, 5);
+
+    int product[5]; // Matrix of size 1x5. Stores the dot product of A and W.
     int resultant[5]; // Matrix of size 1x5. Stores the resultant matrix.
 
+    // Close the files after use to prevent memory leaks.
     fclose(A);
     fclose(W);
     fclose(B);
@@ -124,10 +145,12 @@ void zeroOut(int *matrix, int rows, int columns) {
 
 /**
  * Fills the given matrix with the appropriate number of rows and columns with values 
- * taken from the provided file.
+ * taken from the provided file. Look at the header comments of the zeroOut() function
+ * to understand why a pointer is being passed instead of an array.
  *
  * Assumption: The provided file and matrix must exist already. The matrix must have 
- * the same size as the rows and columns.
+ * the same size as the rows and columns. Row and column values are not malicious. Not 
+ * reading more than 60 characters at a time.
  *
  * Input parameters: matrix: The matrix in which the values will be stored.
  *                   rows: The number of rows in the matrix to be filled.
@@ -135,13 +158,64 @@ void zeroOut(int *matrix, int rows, int columns) {
  *                   file: The file that contains the values to be filled.
  * Returns: Nothing.
  **/
-void fillMatrix(int* matrix, int rows, int columns, FILE file) {
+void fillMatrix(int* matrix, int rows, int columns, FILE *file) {
 
+    int product; // Gets the (memory) length of the matrix.
+
+    // Checks if the number of rows is zero (i.e. 1D array) or not.
+    if (rows != 0) {
+        product = rows * columns; // If not, multiplies the rows and columns to get 
+        // the memory length.
+    } else {
+        product = columns; // If zero, it's a 1D array and spans the column length.
+    }
+
+    int *preOp = matrix; // Store the memory address of matrix prior to manipulation.
+    int index = 0; // Tracks how far into valid memory we are in.
+
+    char line[60]; // Assuming we won't read in more than 60 characters at a time.
+
+    // Index must be less than product for the program to be in valid memory range for 
+    // modification. Also check if we haven't already reached EOF.
+    while (index < product && (!feof(file))) {
+        // Only get in if the line isn't NULL.
+        if (fgets(line, sizeof(line), file) != NULL) {
+
+            // Check if the last character of the string is actually a newline, because 
+            // in certain cases the last character may actually not be a newline, which 
+            // will result in an overwrite of an actual value.
+            if (line[strlen(line) - 1] == '\n') {
+                line[strlen(line) - 1] = '\0'; // Get rid of newline character.
+            }
+
+            char *fetch = strtok(line, " "); // Read in a number. They are separated 
+            // by spaces in the file.
+            int number; // For storing the read in number.
+
+            // Validate we haven't reach end of line or other errors, and are still in
+            // valid memory range.
+            while (fetch != NULL && index < product) {
+                number = atoi(fetch); // Convert the read in character into a numeral.
+                *(matrix) = number; // Store the numeral at the memory address.
+                matrix++; // Increment to the next memory address of the array. Valid 
+                // increments are OS specific and will be handled by compiler.
+                index++; // Increment the valid memory validator.
+                fetch = strtok(NULL, " "); // Read in the next numeral.
+            }
+        }
+    }
+
+    // Check if the matrix pointer has been incremented. If so, return the pointer to 
+    // its valid memory location (i.e start of the array.).
+    if (matrix > preOp) { 
+        matrix = preOp;
+    }
 }
 
 /**
  * Calculates the dot product of two given matrices and stores the result in another
- * provided matrix.
+ * provided matrix. Look at the header comments of the zeroOut() function to understand 
+ * why pointers are being passed instead of an array.
  *
  * Assumption: matrix1 has a size of 1x3, and matrix2 has a size of 3x5. All matrices 
  * must be provided as arguments, including the one in which the result will be stored.
@@ -155,4 +229,13 @@ void fillMatrix(int* matrix, int rows, int columns, FILE file) {
 **/
 void dotProduct(int* matrix1, int* matrix2, int* product) {
 
+}
+
+void printArr(int *matrix, int product) {
+    for (int i = 0; i < product; ++i) {
+        printf("%d ", *(matrix));
+        matrix++;
+    }
+    printf("\n");
+    matrix -= product;
 }
