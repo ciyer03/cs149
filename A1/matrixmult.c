@@ -6,8 +6,8 @@
  * be of size 1x5 as well.
  * Author names: Chandramouli Iyer 
  * Author emails: chandramouli.iyer@sjsu.edu
- * Last modified date: September 8th
- * Creation date: September 8th
+ * Last modified date: September 10th
+ * Creation date: September 10th
  **/
 
 #include <stdio.h>
@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
     zeroOut(&(weights[0][0]), 3, 5);
     zeroOut(bias, 0, 5);
 
+    printf("After Zero Out: \n");
     printArr(input, 3);
     printArr(&(weights[0][0]), 15);
     printArr(bias, 5);
@@ -81,11 +82,16 @@ int main(int argc, char *argv[])
     fillMatrix(&(weights[0][0]), 3, 5, W);
     fillMatrix(bias, 0, 5, B);
 
+    printf("\nAfter Filling Out: \n");
     printArr(input, 3);
     printArr(&(weights[0][0]), 15);
     printArr(bias, 5);
 
     int product[5]; // Matrix of size 1x5. Stores the dot product of A and W.
+    dotProduct(input, &(weights[0][0]), product);
+    printf("\nDot Product of Input and Weights Matrix: \n");
+    printArr(product, 5);
+
     int resultant[5]; // Matrix of size 1x5. Stores the resultant matrix.
 
     // Close the files after use to prevent memory leaks.
@@ -228,7 +234,39 @@ void fillMatrix(int* matrix, int rows, int columns, FILE *file) {
  * Returns: Nothing.
 **/
 void dotProduct(int* matrix1, int* matrix2, int* product) {
+    const int maxRowIncrement = 3; // Max amount of rows to process.
 
+    // Max amount of columns to process along with increments for each iteration of 
+    // the array pointer.
+    const int weightsIncrementAndHighestColumns = 5; 
+
+    // Loop calculates the dot product of matrix1 and matrix2, and stores the result 
+    // in product.
+    for (int i = 0; i < weightsIncrementAndHighestColumns; ++i) {
+        // Stores the result of multiplication of the entire row and column.
+        int result = 0;
+
+        // Loop calculates single row and single column multiplication.
+        for (int j = 0; j < maxRowIncrement; ++j) {
+            
+            // Multiplies one row and one column and stores the output in result.
+            // matrix1 + j increments the pointer address to point to the next value.
+            // By dereferencing that address, we get the raw value. For the second value
+            // we get the correct address for dereferencing by multiplying the row 
+            // increment, j, with the constant weight increment of 5 (calculated 
+            // according to column width), so that we always land at the appropriate 
+            // next value in the column. Then we add the column increment, i, to the 
+            // multiplied value to shift to the appropriate column for multiplication.
+            // Lastly, after we get the correct pointer offset, we add that to the 
+            // pointer address, and dereference it to get the correct raw value.
+            result += ((*(matrix1 + j)) * 
+                (*(matrix2 + ((j * weightsIncrementAndHighestColumns) + i))));
+        }
+        // Store the calculated result in the appropriate dereferenced column 
+        // (offset calculated with the pointer address plus column increment, i) in the 
+        // product array.
+        *(product + i) = result;
+    }
 }
 
 void printArr(int *matrix, int product) {
