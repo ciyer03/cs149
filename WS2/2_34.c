@@ -13,6 +13,6 @@ int main(int argc, char *argv[])
 {
     char str[200];
     scanf("%s", str);
-    printf("Hey %s!\nWelcome to zyBooks!", str);
+    printf("Hey %s!\nWelcome to zyBooks!\n", str);
     return 0;
 }

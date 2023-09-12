@@ -20,6 +20,7 @@ void zeroOut(int *matrix, int rows, int columns);
 void fillMatrix(int* matrix, int rows, int columns, FILE *file);
 void dotProduct(int* matrix1, int* matrix2, int* product);
 void printArr(int *matrix, int product);
+void makeResult(int *matrix1, int *matrix2, int *resultant);
 
 /**
  * Executes the program. Accepts command line parameters.
@@ -48,7 +49,7 @@ int main(int argc, char *argv[])
     FILE *B = fopen(argv[3], "r");
 
     // Check for invalid inputs and exit if found.
-    if (A == NULL || W == NULL || B == NULL) {
+    if (A == NULL || B == NULL || W == NULL) {
         if (A == NULL) {
             printf("error: cannot open file %s\n", argv[1]);
         }
@@ -73,26 +74,16 @@ int main(int argc, char *argv[])
     zeroOut(&(weights[0][0]), 3, 5);
     zeroOut(bias, 0, 5);
 
-    printf("After Zero Out: \n");
-    printArr(input, 3);
-    printArr(&(weights[0][0]), 15);
-    printArr(bias, 5);
-
     fillMatrix(input, 0, 3, A);
     fillMatrix(&(weights[0][0]), 3, 5, W);
     fillMatrix(bias, 0, 5, B);
 
-    printf("\nAfter Filling Out: \n");
-    printArr(input, 3);
-    printArr(&(weights[0][0]), 15);
-    printArr(bias, 5);
-
     int product[5]; // Matrix of size 1x5. Stores the dot product of A and W.
     dotProduct(input, &(weights[0][0]), product);
-    printf("\nDot Product of Input and Weights Matrix: \n");
-    printArr(product, 5);
-
     int resultant[5]; // Matrix of size 1x5. Stores the resultant matrix.
+    makeResult(product, bias, resultant);
+    printf("Result of %s*%s+%s is = ", argv[1], argv[2], argv[3]);
+    printArr(resultant, 5);
 
     // Close the files after use to prevent memory leaks.
     fclose(A);
@@ -248,7 +239,7 @@ void dotProduct(int* matrix1, int* matrix2, int* product) {
 
         // Loop calculates single row and single column multiplication.
         for (int j = 0; j < maxRowIncrement; ++j) {
-            
+
             // Multiplies one row and one column and stores the output in result.
             // matrix1 + j increments the pointer address to point to the next value.
             // By dereferencing that address, we get the raw value. For the second value
@@ -267,13 +258,27 @@ void dotProduct(int* matrix1, int* matrix2, int* product) {
         // product array.
         *(product + i) = result;
     }
+
 }
 
 void printArr(int *matrix, int product) {
+    printf("[ ");
     for (int i = 0; i < product; ++i) {
         printf("%d ", *(matrix));
         matrix++;
     }
-    printf("\n");
+    printf("]\n");
     matrix -= product;
+}
+
+/**
+* Adds the product matrix to the bias matrix, and stores it in the
+* resultant matrix. the formula for the resultant matrix
+* is given as follows: resultant = product + bias, where product = A * W.
+**/
+void makeResult(int *matrix1, int *matrix2, int *resultant) {
+    int maxSize = 5;
+    for (int i = 0; i < maxSize; ++i) {
+        *(resultant + i) = (*(matrix1 + i) + *(matrix2 + i));
+    }
 }

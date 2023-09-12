@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
             min = thirdInt;
         }
     }
-    printf("%d", min);
+    printf("%d\n", min);
 
     return 0;
 }
