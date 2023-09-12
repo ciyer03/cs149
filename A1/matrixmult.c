@@ -10,6 +10,13 @@
  * Creation date: September 8th
  **/
 
+#define MAXCOLUMNS 5
+#define MINCOLUMNS 3
+
+#define MINROWS 1
+#define MAXROWS 3
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -66,17 +73,17 @@ int main(int argc, char *argv[])
         return 1; 
     }
 
-    int input[3]; // Matrix of size 1x3. The input matrix.
-    int weights[3][5]; // Matrix of size 3x5 The weights matrix.
-    int bias[5]; // Matrix of size 1x5. The bias matrix.
+    int input[MINCOLUMNS]; // Matrix of size 1x3. The input matrix.
+    int weights[MAXROWS][MAXCOLUMNS]; // Matrix of size 3x5 The weights matrix.
+    int bias[MAXCOLUMNS]; // Matrix of size 1x5. The bias matrix.
 
-    zeroOut(input, 1, 3);
-    zeroOut(&(weights[0][0]), 3, 5);
-    zeroOut(bias, 1, 5);
+    zeroOut(input, MINROWS, MINCOLUMNS);
+    zeroOut(&(weights[0][0]), MAXROWS, MAXCOLUMNS);
+    zeroOut(bias, MINROWS, MAXCOLUMNS);
 
-    fillMatrix(input, 1, 3, A);
-    fillMatrix(&(weights[0][0]), 3, 5, W);
-    fillMatrix(bias, 1, 5, B);
+    fillMatrix(input, MINROWS, MINCOLUMNS, A);
+    fillMatrix(&(weights[0][0]), MAXROWS, MAXCOLUMNS, W);
+    fillMatrix(bias, MINROWS, MAXCOLUMNS, B);
 
     int product[5]; // Matrix of size 1x5. Stores the dot product of A and W.
     dotProduct(input, &(weights[0][0]), product);
@@ -85,7 +92,7 @@ int main(int argc, char *argv[])
     makeResult(product, bias, resultant);
     
     printf("Result of %s*%s+%s is = ", argv[1], argv[2], argv[3]);
-    printArr(resultant, 1, 5);
+    printArr(resultant, MINROWS, MAXCOLUMNS);
 
     // Close the files after use to prevent memory leaks.
     fclose(A);
