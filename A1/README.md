@@ -1,4 +1,4 @@
-# MatrixMult
+# **MatrixMult**
 
 
 ## Authors: Chandramouli Iyer and Safiullah Saif
@@ -21,9 +21,11 @@ of the files cannot be read for whatever reason, the program will list the probl
 file and quit.
 
 ## Installation
-Step 1: Clone this repo locally: git clone https://ciyer17-admin@bitbucket.org/ciyer17/cs149.git
-Step 2: Navigate into the A1 directory.
-Step 3: Compile the program: gcc -O3 -o matrixmult matrixmult.c
+Step 1: Clone this repo locally: git clone https://ciyer17-admin@bitbucket.org/ciyer17/cs149.git  
+
+Step 2: Navigate into the A1 directory.  
+
+Step 3: Compile the program: gcc -O3 -o matrixmult matrixmult.c  
 
 You should have a file called matrixmult which is the executable.
 
@@ -33,14 +35,19 @@ the test files, execute the following commands (assuming you are in the director
 the program was compiled and the test directory is present in):
 
  1: ./matrixmult.o test/A1.txt test/W1.txt test/B1.txt
+ 
  2: ./matrixmult.o test/A2.txt test/W2.txt test/B2.txt
- 3: ./matrixmult.o test/A3.txt test/W3.txt test/B3.txt
+ 
+ 3: ./matrixmult.o test/A3.txt test/W3.txt test/B3.txt  
+
 
 The output should be the following, respectively:
 
- 1: Result of test/A1.txt*test/W1.txt+test/B1.txt is = [ 111 191 391 51 11 ]
- 2: Result of test/A2.txt*test/W2.txt+test/B2.txt is = [ 701 151 191 51 11 ]
- 3: Result of test/A3.txt*test/W3.txt+test/B3.txt is = [ 11 19 39 55 55 ]
+ 1: Result of test/A1.txt\*test/W1.txt+test/B1.txt is = [ 111 191 391 51 11 ]
+ 
+ 2: Result of test/A2.txt\*test/W2.txt+test/B2.txt is = [ 701 151 191 51 11 ]
+ 
+ 3: Result of test/A3.txt\*test/W3.txt+test/B3.txt is = [ 11 19 39 55 55 ]
 
 You can provide your own test files to the program. Make sure they are readable by the 
 current user and actually exist, otherwise the program will exit with an error.
