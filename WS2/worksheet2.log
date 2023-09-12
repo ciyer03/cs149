@@ -1,0 +1,279 @@
+  1  vim hello.c 
+  2  vim .config/nvim/lua/custom/configs/lspconfig.lua 
+  3  vim hello.c 
+  4  rm hello.c 
+  5  vim hello.c
+  6  rm hello.c tux.o 
+  7  cd Desktop/cs149/WS1/
+  8  sudo apt install zsh git fonts-font-awesome
+  9  echo $ZSH_CUSTOM
+ 10  zsh
+ 11  zsh
+ 12  search bash
+ 13  sudo apt search bash
+ 14  dl command-not-found
+ 15  sudo apt install command-not-found
+ 16  zsh
+ 17  reboot
+ 18  vim .zshrc 
+ 19  nvim .zshrc 
+ 20  history
+ 21 ./1_17.o 7 9
+ 22 gcc -Wall -O3 -o 1_17.o 1_17.c
+ 23 ./1_17.o 0 1
+ 24 gcc -Wall -O3 -o hello.o hello.c
+ 25 ./hello.o
+ 26 rm hello.o hello.c
+ 27 ./1_17.o 9 8
+ 28 ./1_17.o a b
+ 29 ./1_17.o A 6
+ 30 ./1_17.o 8 n
+ 31 ./1_17.o * )
+ 32 ./1_17.o * ;
+ 33 ./1_17.o * -;
+ 34 ./1_17.o * *
+ 35 ./1_17.o $ 5
+ 36 ./1_17.o ^ 8
+ 37 ./1_17.o b &
+ 38 ./1_17.o b *
+ 39 ./1_17.o b $
+ 40 ./1_17.o b #
+ 41 ./1_17.o b @
+ 42 ./1_17.o b !
+ 43 ./1_17.o b (
+ 44 ./1_17.o b -
+ 45 ./1_17.o -- $
+ 46 ./1_17.o bb 7
+ 47 ./1_17.o bb >
+ 48 ./1_17.o bb <
+ 49 ./1_17.o bb =
+ 50 ./1_17.o 87 39
+ 51 ./1_17.o aa bb
+ 52 rm 1_17.o
+ 53 mv 1_19.c 1_18.c
+ 54 gcc -Wall -O3 -o 1_18.o 1_18.c
+ 55 rm 1_18.o
+ 56 rm 1_19.o
+ 57 rm 1_20.o
+ 58 gcc -Wall -)3  -o Lab\ 1.o *.c
+ 59 gcc -Wall -O3  -o Lab\ 1.o *.c
+ 60 for file in *.c; do if [ -f "$file"]; then gcc -Wall -O3 -o "$[file%.c]" "$file" fi done
+ 61 for file in *.c; do if [ -f "$file"]; then gcc -Wall -O3 -o "$[file%.c]" "$file" fi; done
+ 62 for file in *.c; do if [ -f "$file"]; then gcc -Wall -O3 -o "$[file%.c]" "$file"; fi; done
+ 63 for file in *.c; do if [ -f "$file" ]; then gcc -Wall -O3 -o "$[file%.c]" "$file"; fi; done
+ 64 for file in *.c; do if [ -f "$file" ]; then gcc -Wall -O3 -o "${file%.c}" "$file"; fi; done
+ 65 rm 1_15 1_16 1_17 1_18 1_19 1_20
+ 66 for file in *.c; do if [ -f "$file" ]; then gcc -Wall -O3 -o "${file%.c}.o" "$file"; fi; done
+ 67 ./1_17.o u y
+ 68 ./1_17.o 9 6
+ 69 ./1_17.o 9 h
+ 70 ./1_17.o h 5
+ 71 ./1_18.o
+ 72 vim 1_19.c
+ 73 gcc -Wall -O3  -o 1_19.o 1_19.c
+ 74 ./1_19.o
+ 75 history
+ 76 vim .zsh_aliases
+ 77 source .zshrc
+ 78 alias compall
+ 79 dl openssh-client
+ 80 ssh -V
+ 81 ps -auxc | grep ssh-agent
+ 82 sysenablenow sshd
+ 83 sysenablenow ssh
+ 84 sudo systemctl enable --now sshd
+ 85 sudo systemctl enable --now ssh
+ 86 vim .zprofile
+ 87 ssh-keygen -t rsa -C "ciyer17-admin@bitbucket.org" -f bitbucket_cs149
+ 88 shred -uvz -n 100 bitbucket_cs149 bitbucket_cs149.pub
+ 89 ls .ssh
+ 90 ls -lah .ssh
+ 91 cd .ssh
+ 92 ssh-keygen -t rsa -b 4096 -C "ciyer17-admin@bitbucket.org" -f bitbucket_cs149
+ 93 shred -uvz -n 100 *
+ 94 ssh-keygen -t rsa -b 4096 -C "chandramouli.iyer@sjsu.edu" -f bitbucket_cs149
+ 95 ssh-add bitbucket_cs149
+ 96 vim config
+ 97 cat bitbucket_cs149.pub
+ 98 vim bitbucket_cs149.pub
+ 99 vim ~/.config/nvim/lua/custom/init.lua
+ 100 vim .config/nvim/lua/custom/init.lua
+ 101 dl xclip
+ 102 vim .ssh/bitbucket_cs149.pub
+ 103 ssh -T git@bitbucket.org
+ 104 ssh-agent
+ 105 eval $(ssh-agent)
+ 106 whoami
+ 107 sudo systemctl status ssh
+ 108 dl ssh-server
+ 109 dl openssh-server
+ 110 sudo systemctl start sshd
+ 111 sysstop sshd
+ 112 gcc -Wall -O3  -o 1_15.o 1_15.c
+ 113 :q
+ 114 l
+ 115 cat *.c
+ 116 vim
+ 117 nvim
+ 118 cd .config/nvim
+ 119 nano
+ 120 cat 1_17.c
+ 121 rm 1_15.o
+ 122 mkdir ~/Documents/redundatn
+ 123 mv ~/Documents/redundatn ~/Documents/redundant
+ 124 mv 1_15.c 1_16.c 1_17.c ~/Documents/redundant
+ 125 vim README.md
+ 126 cat cm
+ 127 cat cmds.log
+ 128 git add cmds.log *.c
+ 129 git add .gitignore README.md
+ 130 vim hello.c
+ 131 git branch
+ 132 cp README.md WS1/*.c WS1/cmds.log ~/Documents
+ 133 cd ../..
+ 134 cd Desktop
+ 135 rm -rf cs149 nvim.zip
+ 136 git clone 
+ 137 git clone git clone git@bitbucket.org:ciyer17/cs149.git 
+ 138 git clone git@bitbucket.org:ciyer17/cs149.git
+ 139 cd cs149
+ 140 ls -lah
+ 141 mkdir WS1
+ 142 mv ~/Documents/*.c ~/Documents/cmds.log WS1
+ 143 mv ~/Documents/README.md .
+ 144 cat README.md
+ 145 git add README.md WS1/
+ 146 ls ~/Documents
+ 147 ls WS1
+ 148 git add .gitignore WS1/cmds.log
+ 149 git commit -m "First commit" -a
+ 150 tail -n 3 ~/.zsh_aliases
+ 151 ./1_16.o
+ 152 ./1_17.o
+ 153 vim 1_15.c
+ 154 vim 1_16.c
+ 155 vim 1_17.c
+ 156 cat Desktop/cs149/WS1/1_20.c
+ 157 cd Desktop/cs149/WS1
+ 158 git fetch upstream
+ 159 git reset --hard origin/master
+ 160 cat WS1/1_15.c
+ 161 cat WS1/1_15.c WS1/1_16.c WS1/1_17.c
+ 162 vim 1_18.c
+ 163 vim 1_20.c
+ 164 gcc -Wall -O3 -o 1_20.o 1_20.c
+ 165 ./1_20.o
+ 166 git commit -m "Added more clarification to Lab 1_20." -a
+ 167 cd WS1
+ 168 compall
+ 169 ./1_15.o
+ 170 cat 1_20.c
+ 171 rm *.o
+ 172 git fetch origin
+ 173 git pull
+ 174 ip a
+ 175 cd Desktop/cs149
+ 176 mkdir A1
+ 177 mkdir test
+ 178 mv ~/Downloads/*.txt test
+ 179 rm test/*
+ 180 ls test
+ 181 ./matrixmult.o test/A1.txt test/A2.txt test/A3.txt test/B1.txt
+ 182 ./matrixmult.o test/A1.txt test/A2.txt
+ 183 ls A1
+ 184 ls A1/test
+ 185 git commit -m "Added test files for A1, and initial matrix multiplication code." -a
+ 186 vim 
+ 187 vim .gitignore
+ 188 rm A1/matrixmult.o
+ 189 nvim matrixmult.c
+ 190 rm arrayMem.o
+ 191 rm matrixmult.o
+ 192 nvim arrayMem.c
+ 193 gcc -Werror -Wall -O3 -o arrayMem.o arrayMem.c
+ 194 ./arrayMem.o
+ 195 gcc -Werror -Wall -O3 -o matrixmult.o matrixmult.c
+ 196 rm A1/arrayMem.o
+ 197 mv A1/arrayMem.c ~/Desktop
+ 198 git commit -m "Added functions, prototypes, and detailed explanations." -a
+ 199 ./matrixmult.o
+ 200 ./matrixmult.o akjdlkf test/A2.txt lajdlkf
+ 201 ./matrixmult.o akjdlkf lkajdlkf dksljfd
+ 202 vim ../.gitignore
+ 203 git commit -m "Added some comments, and logic for file opening and its error handling." -a
+ 204 vim A1/matrixmult.c
+ 205  vim ~/.zsh_aliases
+ 206  vim ~/.oh-my-zsh/plugins/archlinux/archlinux.plugin.zsh
+ 207  upgrade
+ 208  vim ~/.zshrc
+ 209  alias upgrade
+ 210  sudo apt update; sudo apt upgrade
+ 211  reboot
+ 212  cd Desktop/cs149/A1
+ 213  gcc -Wall -O3 -o matrixmult.o matrixmult.c
+ 214  ls -lah test
+ 215  search qjournal
+ 216  search journal
+ 217  gcc -Wall -O0 -o matrixmult.o matrixmult.c
+ 218  journalctl -b | grep -i matrix
+ 219  gcc -std=c99 -g -o matrixmult.o matrixmult.c
+ 220  gdb ./matrixmult.o test/A1.txt test/B1.txt test/W1.txt
+ 221  cat test/A1.txt
+ 222  cat test/B1.txt
+ 223  cat test/A{1-3}.txt
+ 224  cat test/A[1-3].txt
+ 225  ./matrixmult.o test/A1.txt test/A2.txt test/A3.txt
+ 226  cat matrixmult.c
+ 227  cat test/W1.txt
+ 228  cat test/[A,W,B]1.txt
+ 229  cd
+ 230  cd -
+ 231  cd ..
+ 232  git add .
+ 233  git commit -m "Implemented the logic for filling in arrays with values read in from a file." -a
+ 234  diff
+ 235  git diff
+ 236  git diff c321c0074d2e536980dfb8b235726a068cf1c5e6 b9cf4be1ba29a719562e52ec06e16c037bffa05e
+ 237  git diff b9cf4be1ba29a719562e52ec06e16c037bffa05e c321c0074d2e536980dfb8b235726a068cf1c5e6
+ 238  git status
+ 239  git push -u origin master
+ 240  git log
+ 241  git show c321c0074d2e536980dfb8b235726a068cf1c5e6
+ 242  cd A1
+ 243  ls
+ 244  gcc -std=c99 -Wall -O0 -g -o matrixmult.o matrixmult.c
+ 245  gdb ./matrixmult.o
+ 246  gcc -std=c99 -Wall -O3 -o matrixmult.o matrixmult.c
+ 247  ./matrixmult.o test/A1.txt test/W1.txt test/B1.txt
+ 248  vim matrixmult.c
+249  cat test/[A,W,B]2.txt
+250  gcc -std=c99 -Wall -O3 -o matrixmult.o matrixmult.c
+251  ./matrixmult.o test/A1.txt test/W1.txt test/B1.txt
+252  ./matrixmult.o test/A2.txt test/W2.txt test/B2.txt
+253  cat test/[A,W,B]3.txt
+254  ./matrixmult.o test/A3.txt test/W3.txt test/B3.txt
+255  cd
+256  cd -
+257  cd ..
+258  git status
+259  git add .
+260  git commit -m "Implemented the logic for calculating the dot product of two matrices." -a
+261  git status
+262  git push -u origin master
+263  git status
+264  ls
+265  cat ../WS1/1_18.c
+266  head -n 10 ../A1/matrixmult.c
+267  head -n 15 ../A1/matrixmult.c
+268  ls
+269  vim matrixmult.c
+270  date
+271  pwd
+272  cd ~
+273  cd Desktop/
+274  ls -latr; mkdir ws2; cd ws2
+275  ls -latr
+276  echo $?
+277  man ps
+278  ps aux
+279  top
