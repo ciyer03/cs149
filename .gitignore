@@ -7,6 +7,12 @@
 node_modules/
 dist/
 
+# Compiled object files
+*.o
+
+# Compiled object files
+*.out
+
 # Compiled Java class files
 *.class
 
