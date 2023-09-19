@@ -1,0 +1,337 @@
+    1  9/1/2023 00:25 vim .config/nvim/lua/custom/configs/lspconfig.lua 
+    2  9/1/2023 00:25 vim hello.c 
+    3  9/1/2023 00:25 rm hello.c 
+    4  9/1/2023 00:25 vim hello.c
+    5  9/1/2023 00:25 rm hello.c tux.o 
+    6  9/1/2023 00:25 cd Desktop/cs149/WS1/
+    7  9/1/2023 00:25 sudo apt install zsh git fonts-font-awesome
+    8  9/1/2023 00:25 echo $ZSH_CUSTOM
+    9  9/1/2023 00:26 zsh
+   10  9/1/2023 00:26 zsh
+   11  9/1/2023 00:26 search bash
+   12  9/1/2023 00:26 sudo apt search bash
+   13  9/1/2023 00:26 dl command-not-found
+   14  9/1/2023 00:26 sudo apt install command-not-found
+   15  9/1/2023 00:26 zsh
+   16  9/1/2023 00:26 reboot
+   17  9/1/2023 00:30 vim .zshrc 
+   18  9/1/2023 00:30 nvim .zshrc 
+   19  9/1/2023 00:30 history
+   20  9/1/2023 00:30  which zsh
+   21  9/1/2023 00:30  vim .zshrc
+   22  9/1/2023 01:14  ./1_17.o 7 9
+   23  9/1/2023 01:23  gcc -Wall -O3 -o 1_17.o 1_17.c
+   24  9/1/2023 01:23  ./1_17.o 0 1
+   25  9/1/2023 01:31  gcc -Wall -O3 -o hello.o hello.c
+   26  9/1/2023 01:31  ./hello.o
+   27  9/1/2023 01:31  rm hello.o hello.c
+   28  9/1/2023 01:32  ./1_17.o 9 8
+   29  9/1/2023 01:32  ./1_17.o a b
+   30  9/1/2023 01:32  ./1_17.o A 6
+   31  9/1/2023 01:32  ./1_17.o 8 n
+   32  9/1/2023 01:32  ./1_17.o * )
+   33  9/1/2023 01:32  ./1_17.o * ;
+   34  9/1/2023 01:33  ./1_17.o * -;
+   35  9/1/2023 01:33  ./1_17.o * *
+   36  9/1/2023 01:33  ./1_17.o $ 5
+   37  9/1/2023 01:33  ./1_17.o ^ 8
+   38  9/1/2023 01:33  ./1_17.o b &
+   39  9/1/2023 01:33  ./1_17.o b *
+   40  9/1/2023 01:33  ./1_17.o b $
+   41  9/1/2023 01:34  ./1_17.o b #
+   42  9/1/2023 01:34  ./1_17.o b @
+   43  9/1/2023 01:34  ./1_17.o b !
+   44  9/1/2023 01:34  ./1_17.o b (
+   45  9/1/2023 01:34  ./1_17.o b -
+   46  9/1/2023 01:34  ./1_17.o -- $
+   47  9/1/2023 01:34  ./1_17.o bb 7
+   48  9/1/2023 01:37  ./1_17.o bb >
+   49  9/1/2023 01:37  ./1_17.o bb <
+   50  9/1/2023 01:37  ./1_17.o bb =
+   51  9/1/2023 01:37  ./1_17.o 87 39
+   52  9/1/2023 01:38  ./1_17.o aa bb
+   53  9/1/2023 01:42  rm 1_17.o
+   54  9/1/2023 01:43  mv 1_19.c 1_18.c
+   55  9/1/2023 01:43  gcc -Wall -O3 -o 1_18.o 1_18.c
+   56  9/2/2023 00:42  rm 1_18.o
+   57  9/2/2023 01:48  rm 1_19.o
+   58  9/2/2023 02:07  rm 1_20.o
+   59  9/2/2023 02:09  gcc -Wall -)3  -o Lab\ 1.o *.c
+   60  9/2/2023 02:09  gcc -Wall -O3  -o Lab\ 1.o *.c
+   61  9/2/2023 02:12  for file in *.c; do if [ -f "$file"]; then gcc -Wall -O3 -o "$[file%.c]" "$file" fi done
+   62  9/2/2023 02:12  for file in *.c; do if [ -f "$file"]; then gcc -Wall -O3 -o "$[file%.c]" "$file" fi; done
+   63  9/2/2023 02:13  for file in *.c; do if [ -f "$file"]; then gcc -Wall -O3 -o "$[file%.c]" "$file"; fi; done
+   64  9/2/2023 02:13  for file in *.c; do if [ -f "$file" ]; then gcc -Wall -O3 -o "$[file%.c]" "$file"; fi; done
+   65  9/2/2023 02:14  for file in *.c; do if [ -f "$file" ]; then gcc -Wall -O3 -o "${file%.c}" "$file"; fi; done
+   66  9/2/2023 02:15  rm 1_15 1_16 1_17 1_18 1_19 1_20
+   67  9/2/2023 02:15  for file in *.c; do if [ -f "$file" ]; then gcc -Wall -O3 -o "${file%.c}.o" "$file"; fi; done
+   68  9/2/2023 02:16  ./1_17.o u y
+   69  9/2/2023 02:16  ./1_17.o 9 6
+   70  9/2/2023 02:16  ./1_17.o 9 h
+   71  9/2/2023 02:16  ./1_17.o h 5
+   72  9/2/2023 02:16  ./1_18.o
+   73  9/2/2023 02:17  vim 1_19.c
+   74  9/2/2023 02:18  gcc -Wall -O3  -o 1_19.o 1_19.c
+   75  9/2/2023 02:18  ./1_19.o
+   76  9/2/2023 02:21  history
+   77  9/2/2023 02:21  vim .zsh_aliases
+   78  9/2/2023 02:22  source .zshrc
+   79  9/2/2023 02:23  alias compall
+   80  9/2/2023 16:12  dl openssh-client
+   81  9/2/2023 16:12  ssh -V
+   82  9/2/2023 16:13  ps -auxc | grep ssh-agent
+   83  9/2/2023 16:13  sysenablenow sshd
+   84  9/2/2023 16:13  sysenablenow ssh
+   85  9/2/2023 16:17  sudo systemctl enable --now sshd
+   86  9/2/2023 16:39  sudo systemctl enable --now ssh
+   87  9/2/2023 16:40  vim .zprofile
+   88  9/2/2023 16:43  ssh-keygen -t rsa -C "ciyer17-admin@bitbucket.org" -f bitbucket_cs149
+   89  9/2/2023 16:44  shred -uvz -n 100 bitbucket_cs149 bitbucket_cs149.pub
+   90  9/2/2023 16:49  ls .ssh
+   91  9/2/2023 16:49  ls -lah .ssh
+   92  9/2/2023 16:49  cd .ssh
+   93  9/2/2023 16:50  ssh-keygen -t rsa -b 4096 -C "ciyer17-admin@bitbucket.org" -f bitbucket_cs149
+   94  9/2/2023 16:51  shred -uvz -n 100 *
+   95  9/2/2023 16:52  ssh-keygen -t rsa -b 4096 -C "chandramouli.iyer@sjsu.edu" -f bitbucket_cs149
+   96  9/2/2023 16:53  ssh-add bitbucket_cs149
+   97  9/2/2023 16:54  vim config
+   98  9/2/2023 17:00  cat bitbucket_cs149.pub
+   99  9/2/2023 17:01  vim bitbucket_cs149.pub
+  100  9/2/2023 17:08  vim ~/.config/nvim/lua/custom/init.lua
+  101  9/2/2023 17:10  vim .config/nvim/lua/custom/init.lua
+  102  9/2/2023 17:12  dl xclip
+  103  9/2/2023 17:14  vim .ssh/bitbucket_cs149.pub
+  104  9/2/2023 17:17  ssh -T git@bitbucket.org
+  105  9/4/2023 14:45  ssh-agent
+  106  9/4/2023 14:46  eval $(ssh-agent)
+  107  9/4/2023 14:46  whoami
+  108  9/4/2023 14:50  sudo systemctl status ssh
+  109  9/4/2023 14:50  dl ssh-server
+  110  9/4/2023 14:50  dl openssh-server
+  111  9/4/2023 14:51  sudo systemctl start sshd
+  112  9/4/2023 15:01  sysstop sshd
+  113  9/4/2023 16:25  gcc -Wall -O3  -o 1_15.o 1_15.c
+  114  9/4/2023 16:42  :q
+  115  9/4/2023 16:42  l
+  116  9/4/2023 16:42  cat *.c
+  117  9/4/2023 16:46  vim
+  118  9/4/2023 16:58  nvim
+  119  9/4/2023 17:05  cd .config/nvim
+  120  9/4/2023 17:15  nano
+  121  9/4/2023 19:16  cat 1_17.c
+  122  9/4/2023 19:18  rm 1_15.o
+  123  9/4/2023 19:19  mkdir ~/Documents/redundatn
+  124  9/4/2023 19:19  mv ~/Documents/redundatn ~/Documents/redundant
+  125  9/4/2023 19:20  mv 1_15.c 1_16.c 1_17.c ~/Documents/redundant
+  126  9/4/2023 19:28  cat cm
+  127  9/4/2023 19:28  cat cmds.log
+  128  9/4/2023 19:29  git add cmds.log *.c
+  129  9/4/2023 19:30  git add .gitignore README.md
+  130  9/4/2023 19:30  vim hello.c
+  131  9/4/2023 19:32  git branch
+  132  9/4/2023 19:39  cp README.md WS1/*.c WS1/cmds.log ~/Documents
+  133  9/4/2023 19:46  cd ../..
+  134  9/4/2023 19:46  cd Desktop
+  135  9/4/2023 19:46  rm -rf cs149 nvim.zip
+  136  9/4/2023 19:47  git clone 
+  137  9/4/2023 19:47  git clone git clone git@bitbucket.org:ciyer17/cs149.git 
+  138  9/4/2023 19:47  git clone git@bitbucket.org:ciyer17/cs149.git
+  139  9/4/2023 19:48  ls -lah
+  140  9/4/2023 19:48  mkdir WS1
+  141  9/4/2023 19:49  mv ~/Documents/*.c ~/Documents/cmds.log WS1
+  142  9/4/2023 19:51  mv ~/Documents/README.md .
+  143  9/4/2023 19:51  cat README.md
+  144  9/4/2023 19:51  git add README.md WS1/
+  145  9/4/2023 19:52  ls ~/Documents
+  146  9/4/2023 19:52  ls WS1
+  147  9/4/2023 19:54  git add .gitignore WS1/cmds.log
+  148  9/4/2023 19:54  git commit -m "First commit" -a
+  149  9/4/2023 20:43  tail -n 3 ~/.zsh_aliases
+  150  9/4/2023 20:45  ./1_16.o
+  151  9/4/2023 20:45  ./1_17.o
+  152  9/4/2023 20:47  vim 1_15.c
+  153  9/4/2023 20:47  vim 1_16.c
+  154  9/4/2023 20:48  vim 1_17.c
+  155  9/4/2023 21:10  cat Desktop/cs149/WS1/1_20.c
+  156  9/4/2023 21:54  cd Desktop/cs149/WS1
+  157  9/4/2023 21:54  git fetch upstream
+  158  9/4/2023 21:55  git reset --hard origin/master
+  159  9/4/2023 21:55  cat WS1/1_15.c
+  160  9/4/2023 21:55  cat WS1/1_15.c WS1/1_16.c WS1/1_17.c
+  161  9/4/2023 22:04  vim 1_18.c
+  162  9/4/2023 22:04  vim 1_20.c
+  163  9/4/2023 22:06  gcc -Wall -O3 -o 1_20.o 1_20.c
+  164  9/4/2023 22:06  ./1_20.o
+  165  9/4/2023 22:07  git commit -m "Added more clarification to Lab 1_20." -a
+  166  9/4/2023 22:09  cd WS1
+  167  9/4/2023 22:09  compall
+  168  9/4/2023 22:10  ./1_15.o
+  169  9/4/2023 22:13  cat 1_20.c
+  170  9/4/2023 22:34  ip a
+  171  9/5/2023 23:25  mkdir A1
+  172  9/5/2023 23:25  mkdir test
+  173  9/8/2023 19:22  mv ~/Downloads/*.txt test
+  174  9/8/2023 19:27  rm test/*
+  175  9/8/2023 19:29  ls test
+  176  9/8/2023 19:30  ./matrixmult.o test/A1.txt test/A2.txt test/A3.txt test/B1.txt
+  177  9/8/2023 19:30  ./matrixmult.o test/A1.txt test/A2.txt
+  178  9/8/2023 19:44  ls A1
+  179  9/8/2023 19:44  ls A1/test
+  180  9/8/2023 19:46  git commit -m "Added test files for A1, and initial matrix multiplication code." -a
+  181  9/8/2023 20:33  vim 
+  182  9/8/2023 20:34  vim .gitignore
+  183  9/8/2023 20:35  rm A1/matrixmult.o
+  184  9/8/2023 21:34  nvim matrixmult.c
+  185  9/8/2023 22:39  rm arrayMem.o
+  186  9/8/2023 22:40  rm matrixmult.o
+  187  9/8/2023 23:12  nvim arrayMem.c
+  188  9/8/2023 23:13  gcc -Werror -Wall -O3 -o arrayMem.o arrayMem.c
+  189  9/8/2023 23:13  ./arrayMem.o
+  190  9/8/2023 23:34  gcc -Werror -Wall -O3 -o matrixmult.o matrixmult.c
+  191  9/8/2023 23:35  rm A1/arrayMem.o
+  192  9/8/2023 23:35  mv A1/arrayMem.c ~/Desktop
+  193  9/8/2023 23:36  git commit -m "Added functions, prototypes, and detailed explanations." -a
+  194  9/8/2023 23:42  ./matrixmult.o
+  195  9/9/2023 00:17  ./matrixmult.o akjdlkf test/A2.txt lajdlkf
+  196  9/9/2023 00:17  ./matrixmult.o akjdlkf lkajdlkf dksljfd
+  197  9/9/2023 00:18  vim ../.gitignore
+  198  9/9/2023 00:21  git commit -m "Added some comments, and logic for file opening and its error handling." -a
+  199  9/10/2023 16:51  vim ~/.zsh_aliases
+  200  9/10/2023 16:52  vim ~/.oh-my-zsh/plugins/archlinux/archlinux.plugin.zsh
+  201  9/10/2023 16:53  upgrade
+  202  9/10/2023 16:53  vim ~/.zshrc
+  203  9/10/2023 16:54  alias upgrade
+  204  9/10/2023 16:56  reboot
+  205  9/10/2023 16:58  cd Desktop/cs149/A1
+  206  9/10/2023 17:18  gcc -Wall -O3 -o matrixmult.o matrixmult.c
+  207  9/10/2023 17:36  ls -lah test
+  208  9/10/2023 18:14  search qjournal
+  209  9/10/2023 18:14  search journal
+  210  9/10/2023 18:32  gcc -Wall -O0 -o matrixmult.o matrixmult.c
+  211  9/10/2023 18:32  journalctl -b | grep -i matrix
+  212  9/10/2023 18:33  gcc -std=c99 -g -o matrixmult.o matrixmult.c
+  213  9/10/2023 18:33  gdb ./matrixmult.o test/A1.txt test/B1.txt test/W1.txt
+  214  9/10/2023 18:43  cat test/A1.txt
+  215  9/10/2023 18:43  cat test/B1.txt
+  216  9/10/2023 19:14  cat test/A{1-3}.txt
+  217  9/10/2023 19:14  cat test/A[1-3].txt
+  218  9/10/2023 19:17  ./matrixmult.o test/A1.txt test/A2.txt test/A3.txt
+  219  9/10/2023 19:54  cat test/W1.txt
+  220  9/10/2023 20:13  cat test/[A,W,B]1.txt
+  221  9/10/2023 20:20  git commit -m "Implemented the logic for filling in arrays with values read in from a file." -a
+  222  9/10/2023 20:20  diff
+  223  9/10/2023 20:20  git diff
+  224  9/10/2023 20:21  git diff c321c0074d2e536980dfb8b235726a068cf1c5e6 b9cf4be1ba29a719562e52ec06e16c037bffa05e
+  225  9/10/2023 20:22  git diff b9cf4be1ba29a719562e52ec06e16c037bffa05e c321c0074d2e536980dfb8b235726a068cf1c5e6
+  226  9/10/2023 20:25  git log
+  227  9/10/2023 20:27  git show c321c0074d2e536980dfb8b235726a068cf1c5e6
+  228  9/10/2023 21:14  gcc -std=c99 -Wall -O0 -g -o matrixmult.o matrixmult.c
+  229  9/10/2023 21:14  gdb ./matrixmult.o
+  230  9/10/2023 23:42  cat test/[A,W,B]2.txt
+  231  9/10/2023 23:42  gcc -std=c99 -Wall -O3 -o matrixmult.o matrixmult.c
+  232  9/10/2023 23:50  cat test/[A,W,B]3.txt
+  233  9/10/2023 23:52  cd
+  234  9/10/2023 23:52  cd -
+  235  9/10/2023 23:59  git commit -m "Implemented the logic for calculating the dot product of two matrices." -a
+  236  9/11/2023 00:14  mkdir WS2
+  237  9/11/2023 00:18  cd WS2
+  238  9/11/2023 00:19  ls ../WS1
+  239  9/11/2023 00:30  gcc -std=c99 -Wall -Werror -O3 -o 2_25.o 2_25.c
+  240  9/11/2023 00:33  gcc -std=c99 -Wall -O3 -o 2_25.o 2_25.c
+  241  9/11/2023 00:33  ./2_25.o
+  242  9/11/2023 00:44  man pow
+  243  9/11/2023 00:46  man abs
+  244  9/11/2023 00:51  gcc -std=c99 -Wall -O3 -o 2_29.o 2_29.c
+  245  9/11/2023 00:51  gcc -std=c99 -Wall -O3 -o -lm 2_29.o 2_29.c
+  246  9/11/2023 00:52  gcc -std=c99 -Wall -O3 -lm -o 2_29.o 2_29.c
+  247  9/11/2023 00:52  man powf
+  248  9/11/2023 00:52  man sqrtf
+  249  9/11/2023 00:59  python3
+  250  9/11/2023 16:33  cd Desktop/cs149/WS2
+  251  9/11/2023 16:33  s
+  252  9/11/2023 16:39  cat ../WS1/1_18.c
+  253  9/11/2023 16:39  head -n 10 ../A1/matrixmult.c
+  254  9/11/2023 16:39  head -n 15 ../A1/matrixmult.c
+  255  9/11/2023 16:40  vim 2_25.c
+  256  9/11/2023 16:43  vim 2_29.c
+  257  9/11/2023 16:50  gcc -std=c99 -Wall -O3 -o 2_29.o 2_29.c -lm
+  258  9/11/2023 16:50  ./2_29.o
+  259  9/11/2023 16:51  vim 2_32.c
+  260  9/11/2023 17:04  rm *.o
+  261  9/11/2023 17:06  head -n 10 2_25.c
+  262  9/11/2023 17:08  head -n 10 2_29.c
+  263  9/11/2023 17:08  cd ../A1
+  264  9/11/2023 17:09  history 
+  265  9/11/2023 17:11  history | less
+  266  9/11/2023 17:11  bash
+  267  9/11/2023 17:41  vim worksheet2.log
+  268  9/11/2023 17:47  cat worksheet2.log
+  269  9/11/2023 17:48  cd ../WS2
+  270  9/11/2023 17:48  mv ../A1/worksheet2.log .
+  271  9/11/2023 17:48  dl tree
+  272  9/11/2023 17:49  tree
+  273  9/11/2023 17:49  git add WS2/
+  274  9/11/2023 17:58  git restore A1/matrixmult.c
+  275  9/11/2023 18:01  vim WS2/worksheet2.log
+  276  9/11/2023 18:10  cat WS2/worksheet2.log
+  277  9/11/2023 18:11  cd cs149
+  278  9/11/2023 18:16  git add WS2/worksheet2.log
+  279  9/11/2023 18:17  git commit -m "Added labs 2_25 and 2_29 and the command line history log." -a
+  280  9/11/2023 18:17  git statsus
+  281  9/11/2023 19:02  gcc --version
+  282  9/11/2023 19:10  cd test
+  283  9/11/2023 19:14  ./matrixmult.o test/A1.txt test/W1.txt
+  284  9/11/2023 19:14  ./matrixmult.o test/A1.txt test/W7.txt djfdlk
+  285  9/11/2023 19:19  echo $?
+  286  9/11/2023 19:22  touch README.md
+  287  9/11/2023 19:23  vim README.md
+  288  9/11/2023 19:30  cd A1/test
+  289  9/11/2023 19:30  cat [A,W,B]1.txt
+  290  9/11/2023 19:46  head -n 10 A1/matrixmult.c
+  291  9/11/2023 19:46  head -n 10 matrixmult.c
+  292  9/11/2023 19:47  cat ../WS2/2_34.c
+  293  9/11/2023 19:47  cat ../WS2/2_32.c
+  294  9/11/2023 20:50  git commit -m -a
+  295  9/11/2023 20:50  git commit -m
+  296  9/11/2023 20:50  git commit -a
+  297  9/11/2023 20:50  git commit
+  298  9/11/2023 20:52  git commit --amend -m "Added a README file. Also fixed a logic error in filling out matrices, and made some minor changes."
+  299  9/11/2023 21:01  git fetch origin
+  300  9/11/2023 21:02  git pull
+  301  9/11/2023 21:03  vim A1/matrixmult.c
+  302  9/11/2023 21:06  git commit -m "Fixed the erroneous creation date introduced with commit 667ab1446616f2755034d293e409f40f578db752"
+  303  9/11/2023 21:19  cd A1
+  304  9/11/2023 21:19  cat matrixmult.
+  305  9/11/2023 21:19  cat matrixmult.c
+  306  9/11/2023 22:25  vim matrixmult.c
+  307  9/11/2023 23:19  gcc -Wall -Werror -O3 -o matrixmult.o matrixmult.c
+  308  9/11/2023 23:19  ./matrixmult.o test/A3.txt test/W3.txt test/B3.txt
+  309  9/11/2023 23:19  ./matrixmult.o test/A2.txt test/W2.txt test/B2.txt
+  310  9/11/2023 23:20  ./matrixmult.o test/A1.txt test/W1.txt test/B1.txt
+  311  9/11/2023 23:20  git add .
+  312  9/11/2023 23:20  git commit -m "Replaced magic numbers with defined constants." -a
+  313  9/11/2023 23:20  git status
+  314  9/11/2023 23:20  git push -u origin master
+  315  9/11/2023 23:31  cd ~/Documents
+  316  9/11/2023 23:31  git clone -b master https://ciyer17-admin@bitbucket.org/ciyer17/cs149.git Links to an external site. cs149_chandramouli_iyer
+  317  9/11/2023 23:31  git clone -b master https://ciyer17-admin@bitbucket.org/ciyer17/cs149.git cs149_chandramouli_iyer
+  318  9/11/2023 23:34  cd cs149_chandramouli_iyer
+  319  9/11/2023 23:34  cd ..
+  320  9/11/2023 23:34  rm -r cs149_chandramouli_iyer
+  321  9/12/2023 00:11  man history
+  322  9/12/2023 00:12  locate history
+  323  9/18/2023 08:49  sudo apt update; sudo apt upgrade
+  324  9/18/2023 08:53  sudo reboot now
+  325  9/18/2023 15:53  cd Desktop/cs149
+  326  9/18/2023 15:53  ls
+  327  9/18/2023 15:54  wget https://github.com/torvalds/linux/archive/master.zip
+  328  9/18/2023 15:54  cd Desktop/cs149
+  329  9/18/2023 15:54  unzip master.zip
+  330  9/18/2023 15:55  cd linux-master
+  331  9/18/2023 15:55  pwd
+  332  9/18/2023 15:55  alias l='ls -latr'
+  333  9/18/2023 15:55  l
+  334  9/18/2023 15:55  find . -name mem.c
+  335  9/18/2023 15:56  find . -name mem.c | xargs head
+  336  9/18/2023 15:56  find . -name mem.c | xargs grep 86
+  337  9/18/2023 15:57  cd ..
