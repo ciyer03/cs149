@@ -13,21 +13,23 @@ int main(int argc, char *argv[])
     int count = 1;
     int num;
     int list[9];
+    printf("Enter the list of numbers: ");
     scanf("%d", &num);
     list[0] = num;
-    while (count < 9 && num != -1) {
+    while (count < 9 && num >= 0) {
         scanf("%d", &num);
         list[count] = num;
         count++;
     }
 
-    int midItem = list[count/2] - 1;
+    int midItem = list[count/2];
+    int midIndex = count/2 - 1;
 
-    if (count >= 9) {
-        printf("Too many numbers");
+    if (count > 9) {
+        printf("Too many numbers\n");
     }
     else {
-        printf("%d\n", midItem);
+        printf("%d, %d,  Middle item: %d\n", midIndex, count, midItem);
     }
 
     return 0;
