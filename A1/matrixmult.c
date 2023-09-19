@@ -6,9 +6,16 @@
  * be of size 1x5 as well.
  * Author names: Chandramouli Iyer 
  * Author emails: chandramouli.iyer@sjsu.edu
- * Last modified date: September 10th
- * Creation date: September 10th
+ * Last modified date: September 11th
+ * Creation date: September 8th
  **/
+
+#define MAXCOLUMNS 5
+#define MINCOLUMNS 3
+
+#define MINROWS 1
+#define MAXROWS 3
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,7 +26,7 @@
 void zeroOut(int *matrix, int rows, int columns);
 void fillMatrix(int* matrix, int rows, int columns, FILE *file);
 void dotProduct(int* matrix1, int* matrix2, int* product);
-void printArr(int *matrix, int product);
+void printArr(int *matrix, int rows, int columns);
 void makeResult(int *matrix1, int *matrix2, int *resultant);
 
 /**
@@ -66,24 +73,26 @@ int main(int argc, char *argv[])
         return 1; 
     }
 
-    int input[3]; // Matrix of size 1x3. The input matrix.
-    int weights[3][5]; // Matrix of size 3x5 The weights matrix.
-    int bias[5]; // Matrix of size 1x5. The bias matrix.
+    int input[MINCOLUMNS]; // Matrix of size 1x3. The input matrix.
+    int weights[MAXROWS][MAXCOLUMNS]; // Matrix of size 3x5 The weights matrix.
+    int bias[MAXCOLUMNS]; // Matrix of size 1x5. The bias matrix.
 
-    zeroOut(input, 0, 3);
-    zeroOut(&(weights[0][0]), 3, 5);
-    zeroOut(bias, 0, 5);
+    zeroOut(input, MINROWS, MINCOLUMNS);
+    zeroOut(&(weights[0][0]), MAXROWS, MAXCOLUMNS);
+    zeroOut(bias, MINROWS, MAXCOLUMNS);
 
-    fillMatrix(input, 0, 3, A);
-    fillMatrix(&(weights[0][0]), 3, 5, W);
-    fillMatrix(bias, 0, 5, B);
+    fillMatrix(input, MINROWS, MINCOLUMNS, A);
+    fillMatrix(&(weights[0][0]), MAXROWS, MAXCOLUMNS, W);
+    fillMatrix(bias, MINROWS, MAXCOLUMNS, B);
 
     int product[5]; // Matrix of size 1x5. Stores the dot product of A and W.
     dotProduct(input, &(weights[0][0]), product);
+
     int resultant[5]; // Matrix of size 1x5. Stores the resultant matrix.
     makeResult(product, bias, resultant);
+    
     printf("Result of %s*%s+%s is = ", argv[1], argv[2], argv[3]);
-    printArr(resultant, 5);
+    printArr(resultant, MINROWS, MAXCOLUMNS);
 
     // Close the files after use to prevent memory leaks.
     fclose(A);
@@ -118,16 +127,7 @@ int main(int argc, char *argv[])
  * Returns: Nothing.
  **/
 void zeroOut(int *matrix, int rows, int columns) {
-    int product; // Gets the (memory) length of the matrix.
-
-    // Checks if the number of rows is zero (i.e. 1D array) or not.
-    if (rows != 0) {
-        product = rows * columns; // If not, multiplies the rows and columns to get 
-        // the memory length.
-    } else {
-        product = columns; // If zero, it's a 1D array and spans the column length.
-    }
-
+    const int product = rows * columns; // Used to calculate the valid memory range of the matrix.
     // Iterate through the memory length (determined by product).
     for (int i = 0; i < product; ++i) {
         *(matrix) = 0; // Dereference the pointer, and zero it out.
@@ -157,16 +157,7 @@ void zeroOut(int *matrix, int rows, int columns) {
  **/
 void fillMatrix(int* matrix, int rows, int columns, FILE *file) {
 
-    int product; // Gets the (memory) length of the matrix.
-
-    // Checks if the number of rows is zero (i.e. 1D array) or not.
-    if (rows != 0) {
-        product = rows * columns; // If not, multiplies the rows and columns to get 
-        // the memory length.
-    } else {
-        product = columns; // If zero, it's a 1D array and spans the column length.
-    }
-
+    const int product = rows * columns; 
     int *preOp = matrix; // Store the memory address of matrix prior to manipulation.
     int index = 0; // Tracks how far into valid memory we are in.
 
@@ -175,6 +166,10 @@ void fillMatrix(int* matrix, int rows, int columns, FILE *file) {
     // Index must be less than product for the program to be in valid memory range for 
     // modification. Also check if we haven't already reached EOF.
     while (index < product && (!feof(file))) {
+        // Keeps track of how many columns have been traversed. Required so that if 
+        // there are less numbers taken in than there are columns, we can move the 
+        // pointer to end of the row.
+        int columnCounter = columns;
         // Only get in if the line isn't NULL.
         if (fgets(line, sizeof(line), file) != NULL) {
 
@@ -192,6 +187,7 @@ void fillMatrix(int* matrix, int rows, int columns, FILE *file) {
             // Validate we haven't reach end of line or other errors, and are still in
             // valid memory range.
             while (fetch != NULL && index < product) {
+                columnCounter--;
                 number = atoi(fetch); // Convert the read in character into a numeral.
                 *(matrix) = number; // Store the numeral at the memory address.
                 matrix++; // Increment to the next memory address of the array. Valid 
@@ -199,6 +195,7 @@ void fillMatrix(int* matrix, int rows, int columns, FILE *file) {
                 index++; // Increment the valid memory validator.
                 fetch = strtok(NULL, " "); // Read in the next numeral.
             }
+            matrix += columnCounter;
         }
     }
 
@@ -240,35 +237,52 @@ void dotProduct(int* matrix1, int* matrix2, int* product) {
         // Loop calculates single row and single column multiplication.
         for (int j = 0; j < maxRowIncrement; ++j) {
 
-            // Multiplies one row and one column and stores the output in result.
-            // matrix1 + j increments the pointer address to point to the next value.
-            // By dereferencing that address, we get the raw value. For the second value
-            // we get the correct address for dereferencing by multiplying the row 
-            // increment, j, with the constant weight increment of 5 (calculated 
-            // according to column width), so that we always land at the appropriate 
-            // next value in the column. Then we add the column increment, i, to the 
-            // multiplied value to shift to the appropriate column for multiplication.
-            // Lastly, after we get the correct pointer offset, we add that to the 
-            // pointer address, and dereference it to get the correct raw value.
+            /** Multiplies one row and one column and stores the output in result.
+             *  matrix1 + j increments the pointer address to point to the next value.
+            *  By dereferencing that address, we get the raw value. For the second value
+            *  we get the correct address for dereferencing by multiplying the row 
+            *  increment, j, with the constant weight increment of 5 (calculated 
+            *  according to column width), so that we always land at the appropriate 
+            *  next value in the column. Then we add the column increment, i, to the 
+            *  multiplied value to shift to the appropriate column for multiplication.
+            *  Lastly, after we get the correct pointer offset, we add that to the 
+            *  pointer address, and dereference it to get the correct raw value.
+            **/
             result += ((*(matrix1 + j)) * 
                 (*(matrix2 + ((j * weightsIncrementAndHighestColumns) + i))));
         }
-        // Store the calculated result in the appropriate dereferenced column 
-        // (offset calculated with the pointer address plus column increment, i) in the 
-        // product array.
+        /** Store the calculated result in the appropriate dereferenced column 
+          * (offset calculated with the pointer address plus column increment, i) in the
+          * product array.
+          **/
         *(product + i) = result;
     }
-
 }
 
-void printArr(int *matrix, int product) {
+/**
+ * Prints the contents of the given matrix. Since we are using pointers, we calculate 
+ * the valid memory range using the numbers of rows and columns.
+ *
+ * Assumptions: The rows and columns variables are not a malicious, and represent the 
+ * actual number of rows and columns in the matrix.
+ *
+ * Input parameters: matrix: The array pointer.
+ *                   rows: The number of rows in the matrix.
+ *                   columns: The number of columns in the matrix.
+ **/
+void printArr(int *matrix, int rows, int columns) {
+    const int product = rows * columns; // Used to calculate the valid memory range of the matix.
+
     printf("[ ");
+
+    // Iterates through the array addresses, derefernces the pointer, and prints out the
+    // value at that address. Then increments the pointer addresses to the next value.
     for (int i = 0; i < product; ++i) {
         printf("%d ", *(matrix));
         matrix++;
     }
     printf("]\n");
-    matrix -= product;
+    matrix -= product; // Set the pointer back to the start of the array.
 }
 
 /**
@@ -277,7 +291,7 @@ void printArr(int *matrix, int product) {
 * is given as follows: resultant = product + bias, where product = A * W.
 **/
 void makeResult(int *matrix1, int *matrix2, int *resultant) {
-    int maxSize = 5;
+    const int maxSize = 5;
     for (int i = 0; i < maxSize; ++i) {
         *(resultant + i) = (*(matrix1 + i) + *(matrix2 + i));
     }
