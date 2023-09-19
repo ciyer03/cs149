@@ -27,6 +27,6 @@ int main(int argc, char *argv[])
         }
     }
     double avg = total/count;
-    printf("%d %d\n", max, (int)avg);
+    printf("%d %.2lf\n", max, avg);
     return 0;
 }
