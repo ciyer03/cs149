@@ -17,14 +17,12 @@
 #define MAX_ROWS 8
 #define MAX_PROCESSES 8
 
-
 // Function prototypes. See the function declarations for more information.
 void zeroOut(int *matrix, int rows, int columns);
 void fillMatrix(int* matrix, int rows, int columns, FILE *file);
 void rowSum(int* matrix1, int* matrix2, int* product, int row);
-void printArr(int *matrix, int rows, int columns);
-void makeResult(int *matrix1, int *matrix2, int *resultant);
 void fillRow(int row, int *sourceMatrix, int *resultant);
+void printArr(int *matrix, int rows, int columns);
 
 /**
  * Executes the program. Accepts command line parameters.
@@ -75,7 +73,9 @@ int main(int argc, char *argv[])
     fillMatrix(&(weights[0][0]), MAX_ROWS, MAX_COLUMNS, W);
 
     int resultant[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8. The resultant matrix.
+    zeroOut(&(resultant[0][0]), MAX_ROWS, MAX_COLUMNS);
 
+    // Create a read/write pipe for each child process.
     int fd[MAX_PROCESSES][2];
 
     // Create pipes for read/write for all processes.
@@ -88,48 +88,82 @@ int main(int argc, char *argv[])
     
     pid_t pid[MAX_PROCESSES]; // Hold PIDs for each child process.
 
+    // Calculate dot product of each row of the matrix in a different child process.
     for (int i = 0; i < MAX_PROCESSES; ++i) {
+
+        // Store the PID of each process. Will be 0 for child process. In the parent 
+        // process, it'll the PID of the child process.
         pid[i] = fork();
+
+        if (pid[i] == 0) { // If we are in the child process.
+
+            // Close unneeded read and write ends of the pipe.
+            for (int j = 0; j < MAX_PROCESSES; ++j) {
+                close(fd[j][0]); // Child processes won't read anything.
+                if (j != i) {
+                    close(fd[j][1]); // Close all write ends except the current.
+                }
+            }
+
+            // Pass the row number to the parent process, and if for some reason that
+            // fails, end the process.
+            if (write(fd[i][1], &i, sizeof(int)) == -1) {
+                printf("Error while writing row number. Problematic child: %d. Iteration: %d.\n", getpid(), i);
+                return 1;
+            }
+
+            // Calculate and store the row specific dot product.
+            int rowResult[MAX_COLUMNS];  
+            rowSum(&(input[0][0]), &(weights[0][0]), rowResult, i);
+
+            // Pass the calculated array to the parent process, and if for some reason 
+            // that fails, end the process.
+            if (write(fd[i][1], rowResult, sizeof(int) * MAX_COLUMNS) == -1) {
+                printf("Error while writing array. Problematic child: %d. Iteration: %d.\n", getpid(), i);
+                return 1;
+            }
+
+            close(fd[i][1]); // Close write pipe once written.
+            return 0; // End the child process so it doesn't fork itself.
+        }
     }
 
     // Parent process.
     for (int i = 0; i < MAX_PROCESSES; ++i) {
         int wstatus;
-        int childPID = wait(&wstatus);
-        if (WIFEXITED(wstatus)) { // If the child process exited normally.
-            int exitStatus = WEXITSTATUS(wstatus);
+        int childPID = wait(&wstatus); // Wait for each child process to end.
+        if (WIFEXITED(wstatus)) { // Check if the child process exited normally.
+            int exitStatus = WEXITSTATUS(wstatus); // Store exit code of child process.
             if (exitStatus == 0) { // If the child process exited with code 0 (success)
-                
                 // Holds the row values returned by the child process.
                 int rowResult[MAX_COLUMNS];
 
                 int rowCompleted; // The row that the child process calculated.
 
-                // Reads in the row that the row that the child process calculated.
-                if (read(fd[MAX_PROCESSES][0], &rowCompleted, sizeof(int)) == -1) {
+                // Reads in the row that the child process calculated.
+                if (read(fd[i][0], &rowCompleted, sizeof(int)) == -1) {
                     printf("Error while reading value. Problematic child: %d\n", 
                            childPID);
                     return 1;
                 }
 
                 // Reads in the row values that the child process calculated.
-                if (read(fd[MAX_PROCESSES][0], &rowResult, sizeof(int) * MAX_COLUMNS)
+                if (read(fd[i][0], rowResult, sizeof(int) * MAX_COLUMNS)
                     == -1) {
                     printf("Error while reading value. Problematic child: %d\n", 
                            childPID);
                     return 1;
                 }
-                
+
+                close(fd[i][0]); // Close the read pipe after use.
                 fillRow(rowCompleted, rowResult, &(resultant[0][0]));
 
-            } else {
+            } else { // In case the child process failed.
                 printf("Child %d exited abnormally with code %d.\n", childPID, 
                        exitStatus);
             }
         }
     }
-    
-    printf("Result of %s*%s is = ", argv[1], argv[2]);
     printArr(&(resultant[0][0]), MAX_ROWS, MAX_COLUMNS);
 
     // Close the files after use to prevent memory leaks.
@@ -259,7 +293,7 @@ void fillMatrix(int* matrix, int rows, int columns, FILE *file) {
 **/ 
 void rowSum(int* matrix1, int* matrix2, int* product, int row) {
     // Calculates the row to be multiplied.
-    int rowStart = (row - 1 ) * MAX_ROWS;
+    const int rowStart = row * MAX_ROWS;
 
     // Loop calculates the dot product of matrix1 and matrix2, and stores the result 
     // in product.
@@ -285,8 +319,8 @@ void rowSum(int* matrix1, int* matrix2, int* product, int row) {
              * that to the pointer address, and dereference it to get the correct raw 
              * value.
              **/
-            int rowIncrement = rowStart + j;
-            int columnIncrement = (j * MAX_COLUMNS) + i;
+            const int rowIncrement = rowStart + j;
+            const int columnIncrement = (j * MAX_COLUMNS) + i;
             result += (*(matrix1 + rowIncrement)) * (*(matrix2 + columnIncrement));
         }
 
@@ -307,40 +341,19 @@ void fillRow(int row, int *sourceMatrix, int *resultant) {
 }
 
 
-/**
- * Prints the contents of the given matrix. Since we are using pointers, we calculate 
- * the valid memory range using the numbers of rows and columns.
- *
- * Assumptions: The rows and columns variables are not a malicious, and represent the 
- * actual number of rows and columns in the matrix.
- *
- * Input parameters: matrix: The array pointer.
- *                   rows: The number of rows in the matrix.
- *                   columns: The number of columns in the matrix.
- **/
 void printArr(int *matrix, int rows, int columns) {
     const int product = rows * columns; // Used to calculate the valid memory range of the matix.
-
-    printf("[ ");
-
+    int j = 1;
     // Iterates through the array addresses, derefernces the pointer, and prints out the
     // value at that address. Then increments the pointer addresses to the next value.
     for (int i = 0; i < product; ++i) {
         printf("%d ", *(matrix));
         matrix++;
+        if (j % 8 == 0) {
+            printf("\n");
+        }
+        ++j;
     }
-    printf("]\n");
+    printf("\n");
     matrix -= product; // Set the pointer back to the start of the array.
-}
-
-/**
-* Adds the product matrix to the bias matrix, and stores it in the
-* resultant matrix. the formula for the resultant matrix
-* is given as follows: resultant = product + bias, where product = A * W.
-**/
-void makeResult(int *matrix1, int *matrix2, int *resultant) {
-    const int maxSize = 5;
-    for (int i = 0; i < maxSize; ++i) {
-        *(resultant + i) = (*(matrix1 + i) + *(matrix2 + i));
-    }
 }
