@@ -1,0 +1,4 @@
+/Users/safi/CLionProjects/WS4/cmake-build-debug/CMakeFiles/6_20.dir
+/Users/safi/CLionProjects/WS4/cmake-build-debug/CMakeFiles/6_30.dir
+/Users/safi/CLionProjects/WS4/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/safi/CLionProjects/WS4/cmake-build-debug/CMakeFiles/rebuild_cache.dir
