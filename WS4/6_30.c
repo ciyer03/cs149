@@ -6,8 +6,9 @@
  */
 
 #include <stdio.h>
-#include "MaxNumber.h"
-#include "MinNumber.h"
+
+void MaxNumber(int num1, int num2, int num3, int num4);
+void MinNumber(int num1, int num2, int num3, int num4);
 
 //This is the main function. This function takes in 4 integers from the user, and calls the MaxNumber() and MinNumber() functions to calculate the maximum and minimum number from the given set of input integers respectively.
 int main() {
@@ -22,7 +23,7 @@ int main() {
 
 
 //This is the function to calculate the maximum number out of the 4 given parameters, which are the inputs given by the user in the form of integers.
-int MaxNumber(int num1, int num2, int num3, int num4) {
+void MaxNumber(int num1, int num2, int num3, int num4) {
     int max = num1;
 
     if (num2 > max) {
@@ -38,7 +39,7 @@ int MaxNumber(int num1, int num2, int num3, int num4) {
 }
 
 //This is the function to calculate the minimum number out of the 4 given parameters, which are the inputs given by the user in the form of integers.
-int MinNumber(int num1, int num2, int num3, int num4) {
+void MinNumber(int num1, int num2, int num3, int num4) {
     int min = num1;
 
     if (num2 < min) {
