@@ -32,16 +32,12 @@ int main() {
 //This is the function to calculate the maximum number out of the 4 given parameters, which are the inputs given by the user in the form of integers.
 int MaxNumber(int arr[4]) {
     int max = arr[0];
+    for (int j = 1; j < 4; j++) {
+        if (arr[j] > max) {
+            max = arr[j];
+        }
+    }
 
-    if (arr[1] > max) {
-        max = arr[1];
-    }
-    if (arr[2] > max) {
-        max = arr[2];
-    }
-    if (arr[3] > max) {
-        max = arr[3];
-    }
     return max;
 
 }
@@ -50,15 +46,12 @@ int MaxNumber(int arr[4]) {
 int MinNumber(int arr[4]) {
     int min = arr[0];
 
-    if (arr[1] < min) {
-        min = arr[1];
+    for (int j = 1; j < 4; j++) {
+        if (arr[j] < min) {
+            min = arr[j];
+        }
     }
-    if (arr[2] < min) {
-        min = arr[2];
-    }
-    if (arr[3] < min) {
-        min = arr[3];
-    }
+
     return min;
 
 }
