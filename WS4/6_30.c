@@ -7,49 +7,58 @@
 
 #include <stdio.h>
 
-void MaxNumber(int num1, int num2, int num3, int num4);
-void MinNumber(int num1, int num2, int num3, int num4);
+int MaxNumber(int arr[4]);
+int MinNumber(int arr[4]);
 
 //This is the main function. This function takes in 4 integers from the user, and calls the MaxNumber() and MinNumber() functions to calculate the maximum and minimum number from the given set of input integers respectively.
 int main() {
 
-    int num1, num2, num3, num4;
+    int arr[4];
     printf("Enter the 4 numbers: ");
-    scanf("%d %d %d %d", &num1, &num2, &num3, &num4);
-    MaxNumber(num1, num2, num3, num4);
-    MinNumber(num1, num2, num3, num4);
+
+    for (int i = 0; i < 4; i++) {
+        scanf("%d", &arr[i]);
+    }
+
+    int maxNum = MaxNumber(arr);
+    int minNum = MinNumber(arr);
+
+    printf("Maximum is %d\n", maxNum);
+    printf("Minimum is %d\n", minNum);
     return 0;
 }
 
 
 //This is the function to calculate the maximum number out of the 4 given parameters, which are the inputs given by the user in the form of integers.
-void MaxNumber(int num1, int num2, int num3, int num4) {
-    int max = num1;
+int MaxNumber(int arr[4]) {
+    int max = arr[0];
 
-    if (num2 > max) {
-        max = num2;
+    if (arr[1] > max) {
+        max = arr[1];
     }
-    if (num3 > max) {
-        max = num3;
+    if (arr[2] > max) {
+        max = arr[2];
     }
-    if (num4 > max) {
-        max = num4;
+    if (arr[3] > max) {
+        max = arr[3];
     }
-    printf("Maximum is %d\n", max);
+    return max;
+
 }
 
 //This is the function to calculate the minimum number out of the 4 given parameters, which are the inputs given by the user in the form of integers.
-void MinNumber(int num1, int num2, int num3, int num4) {
-    int min = num1;
+int MinNumber(int arr[4]) {
+    int min = arr[0];
 
-    if (num2 < min) {
-        min = num2;
+    if (arr[1] < min) {
+        min = arr[1];
     }
-    if (num3 < min) {
-        min = num3;
+    if (arr[2] < min) {
+        min = arr[2];
     }
-    if (num4 < min) {
-        min = num4;
+    if (arr[3] < min) {
+        min = arr[3];
     }
-    printf("Minimum is %d\n", min);
+    return min;
+
 }

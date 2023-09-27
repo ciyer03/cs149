@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-void LapsToMiles(double laps);
+double LapsToMiles(double laps);
 
 // This is the main function. This function takes the number of laps as the input from the user, and calls the LapsToMiles() function.
 int main() {
@@ -15,13 +15,15 @@ int main() {
     double laps;
     printf("Enter the number of laps: ");
     scanf("%lf", &laps);
-    LapsToMiles(laps);
+    double numMiles = LapsToMiles(laps);
+    printf("%0.2lf\n", numMiles);
     return 0;
 }
 
 //This function calculates the number of miles depending on the number of miles, which is given as a parameter while calling this funciton, and prints the number of miles as the output accordingly.
-void LapsToMiles(double laps) {
+double LapsToMiles(double laps) {
 
     double miles = laps / 4;
-    printf("%0.2lf\n", miles);
+    return miles;
+
 }
