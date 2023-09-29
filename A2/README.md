@@ -52,4 +52,18 @@ Result of A*W = [ <br />
 
 
 You can provide your own test files to the program. Make sure they are readable by the 
-current user and actually exist, otherwise the program will exit with an error.
+current user and actually exist, otherwise the program will exit with an error. <br />
+
+## Average Running Time
+Running the program three times with the following commands: <br />
+
+time ./matrixmult_parallel.o test/A.txt test/W.txt <br />
+
+results in the following time output: <br />
+./matrixmult_parallel.o test/A.txt test/W.txt  0.00s user 0.00s system 94% cpu 0.005 total <br />
+
+./matrixmult_parallel.o test/A.txt test/W.txt  0.00s user 0.00s system 94% cpu 0.004 total <br />
+
+./matrixmult_parallel.o test/A.txt test/W.txt  0.00s user 0.00s system 94% cpu 0.004 total <br />
+
+which averages out to 0.004 secs per run.
