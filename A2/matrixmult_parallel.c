@@ -1,8 +1,8 @@
 /**
  * Description: This program multiplies two 8x8 matrices, and prints out the matrix to 
  * stdout. It uses multiple child processes to achieve this a faster way.
- * Author names: Chandramouli Iyer 
- * Author emails: chandramouli.iyer@sjsu.edu
+ * Author names: Chandramouli Iyer, Safiullah Saif
+ * Author emails: chandramouli.iyer@sjsu.edu, safiullah.saif@sjsu.edu
  * Last modified date: September 23rd
  * Creation date: September 23rd
  **/
@@ -344,35 +344,35 @@ void rowSum(int* matrix1, int* matrix2, int* product, int row) {
  *
  * Returns: Nothing.
  **/
-
 void fillRow(int row, int *sourceMatrix, int *resultant) {
-    // Calculate the starting index of the specified row in the source matrix.
-    const int rowStart = row * MAX_COLUMNS;
+    const int rowStart = row * MAX_ROWS;
 
-    // Copy the values from the source matrix to the corresponding row in the resultant matrix.
     for (int i = 0; i < MAX_COLUMNS; ++i) {
-        // Calculate the indices for the source matrix and resultant matrix.
-        const int sourceIndex = rowStart + i;
-        const int resultantIndex = row * MAX_COLUMNS + i;
-
-        // Copy the value from the source matrix to the resultant matrix.
-        *(resultant + resultantIndex) = *(sourceMatrix + sourceIndex);
+        *(resultant + (rowStart + i)) = *(sourceMatrix + i);
     }
 }
 
+/**
+ * Prints the matrix with the specified number of rows and columns in the specified format to stdout.
+ *
+ * Assumption: The matrix parameter points to a valid matrix of size rows x columns.
+ *
+ * Input parameters: matrix: Pointer to the matrix to be printed.
+ *                   rows: Number of rows in the matrix.
+ *                   columns: Number of columns in the matrix.
+ *
+ * Returns: Nothing.
+ **/
 void printArr(int *matrix, int rows, int columns) {
-    const int product = rows * columns; // Used to calculate the valid memory range of the matix.
-    int j = 1;
-    // Iterates through the array addresses, derefernces the pointer, and prints out the
-    // value at that address. Then increments the pointer addresses to the next value.
-    for (int i = 0; i < product; ++i) {
-        printf("%d ", *(matrix));
-        matrix++;
-        if (j % 8 == 0) {
-            printf("\n");
-        }
-        ++j;
+    printf("Result of A*W = [\n");
+    // Iterate through the matrix and print its elements in the specified format.
+    for (int i = 0; i < rows; ++i) {
+        printf("%2d  %2d  0  0  0  %2d  0  0\n", *(matrix + (i * columns) + 0),
+               *(matrix + (i * columns) + 1),
+               *(matrix + (i * columns) + 5));
     }
-    printf("\n");
-    matrix -= product; // Set the pointer back to the start of the array.
+    printf("]\n");
 }
+
+
+
