@@ -333,13 +333,32 @@ void rowSum(int* matrix1, int* matrix2, int* product, int row) {
 }
 
 /**
+ * Fills the specified row in the resultant matrix with the values from the source
+ * matrix.
  *
+ * Assumption: The row parameter is a valid row index (0 to 7).
  *
+ * Input parameters: row: The row index in the resultant matrix to be filled.
+ *                   sourceMatrix: The matrix containing the values to be copied from.
+ *                   resultant: The resultant matrix to be filled.
+ *
+ * Returns: Nothing.
  **/
+
 void fillRow(int row, int *sourceMatrix, int *resultant) {
+    // Calculate the starting index of the specified row in the source matrix.
+    const int rowStart = row * MAX_COLUMNS;
 
+    // Copy the values from the source matrix to the corresponding row in the resultant matrix.
+    for (int i = 0; i < MAX_COLUMNS; ++i) {
+        // Calculate the indices for the source matrix and resultant matrix.
+        const int sourceIndex = rowStart + i;
+        const int resultantIndex = row * MAX_COLUMNS + i;
+
+        // Copy the value from the source matrix to the resultant matrix.
+        *(resultant + resultantIndex) = *(sourceMatrix + sourceIndex);
+    }
 }
-
 
 void printArr(int *matrix, int rows, int columns) {
     const int product = rows * columns; // Used to calculate the valid memory range of the matix.
