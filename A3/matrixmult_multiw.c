@@ -17,6 +17,7 @@
  
 #define MAX_COLUMNS 8
 #define MAX_ROWS 8
+#define FN_SIZE 15 // File name size
 
 /**
  * Executes the program. Accepts command line parameters.
@@ -38,8 +39,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    char out_file[15];
-    char err_file[15];
+    char out_file[FN_SIZE];
+    char err_file[FN_SIZE];
     int out_fd;
     int err_fd;
 
@@ -59,25 +60,61 @@ int main(int argc, char *argv[]) {
             close(preChild[0]);
             
             // Create a string that results in PID.out and PID.err, where PID is the PID of the 
-            // process.
+            // process, and store that in the char array out_file and err_file respectively.
             snprintf(out_file, sizeof(out_file), "%d.out", pid);
             snprintf(err_file, sizeof(err_file), "%d.err", pid);
 
-            // Create the actual files on disk, open in RW mode, and truncate them to length 0.
-            out_fd = open(out_file, O_RDWR | O_CREAT | O_APPEND, 0777);
-            err_fd = open(err_file, O_RDWR | O_CREAT | O_APPEND, 0777);
-            
-            if (write(preChild[1], "Continue", 8) == -1) {
-                printf("Write error.\n");
+            if (write(preChild[1], out_file, strlen(out_file)) == -1) {
+                printf("Write error for sending filename %s to child pid %d.\n", out_file, pid);
+                close(preChild[1]);
                 return 1;
             }
+
+            if (write(preChild[1], err_file, strlen(err_file)) == -1) {
+                printf("Write error for sending filename %s to child pid %d.\n", err_file, pid);
+                close(preChild[1]);
+                return 1;
+            }
+
+            close(preChild[1]);
+
         } else {
             close(preChild[1]);
 
+            int childPID = getpid();
+
+            // Reads in the filename created by the parent process. Mainly to ensure that the files for the 
+            // process have been created.
+            if (read(preChild[0], out_file, strlen(out_file)) == -1) {
+                printf("Read error in child pid %d, for reading stdout filename.\n", childPID);
+                close(preChild[0]);
+                return 1;
+            }
+
+            if (read(preChild[0], err_file, strlen(err_file)) == -1) {
+                printf("Read error in child pid %d, for reading stderr filename.\n", childPID);
+                close(preChild[0]);
+                return 1;
+            }
+            close(preChild[0]);
+
+            // Create the actual files on disk, open in write only and append mode.
+            out_fd = open(out_file, O_WRONLY | O_CREAT | O_APPEND, 0777);
+            err_fd = open(err_file, O_WRONLY | O_CREAT | O_APPEND, 0777);
+
+            // Redirect stdout and stderr to out_file and err_file respectively.
+            dup2(out_fd, STDOUT_FILENO);
+            dup2(err_fd, STDERR_FILENO);
+
+            fprintf(stdout, "Starting command %d: child %d pid of parent %d\n", i + 1, childPID, getppid());
+
             int matrixNum = argc - (numWMatrices - i); // Gets the index of the matrix to pass.
             // Call matrixmult with the A matrix and a W matrix specified by the index.
-            if (execl("./matrixmult", "matrixmult", argv[1], argv[matrixNum], NULL) == -1) {
-                printf("execv failed for matrix %d.\n", matrixNum);
+            if (execl("./matrixmult", "matrixmult", argv[1], argv[matrixNum], out_file, err_file, NULL) == -1) {
+                fprintf(stderr, "execl() failed. Command tried to execute: %s %s %s %s %s", "./matrixmult", 
+                        argv[1], argv[2], out_file, err_file);
+                close(out_fd);
+                close(err_fd);
                 return 1;
             }
         }
@@ -87,6 +124,10 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < numWMatrices; ++i) {
         int wstatus;
         int childPID = wait(&wstatus); // Wait for each child process to end.
+
+        // Open the specific child's stdout and stderr files in write only and append mode.
+        out_fd = open(out_file, O_WRONLY | O_APPEND, 0777);
+        err_fd = open(err_file, O_WRONLY | O_APPEND, 0777);
 
         if (WIFEXITED(wstatus)) { // Check if the child process exited normally.
             int exitStatus = WEXITSTATUS(wstatus); // Store exit code of child process.
@@ -99,5 +140,8 @@ int main(int argc, char *argv[]) {
         } else if (WIFSIGNALED(wstatus)) {
             // Implementation.
         }
+
+        close(out_fd);
+        close(err_fd);
     }
 }

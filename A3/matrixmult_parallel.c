@@ -39,24 +39,34 @@ void printArr(int *matrix, int rows, int columns);
 int main(int argc, char *argv[])
 {
     // Checks if there are exactly four arguments (3 files, and 1 default).
-    if (argc != 3) {
-        printf("error: expecting exactly 2 files as input\n");
+    if (argc != 5) {
+        printf("error: expecting exactly 5 inputs.\n");
         printf("Terminating, exit code 1.\n");
         return 1;
     }
 
-    // Create FILE pointers for the given files, and open in read mode.
+    // Create FILE pointers for the given files, and open in read and append modes, as needed.
     FILE *A = fopen(argv[1], "r");
     FILE *W = fopen(argv[2], "r");
+    FILE *out_file = fopen(argv[3], "a");
+    FILE *err_file = fopen(argv[4], "a");
 
     // Check for invalid inputs and exit if found.
-    if (A == NULL || W == NULL) {
+    if (A == NULL || W == NULL || out_file == NULL || err_file == NULL) {
         if (A == NULL) {
             printf("error: cannot open file %s\n", argv[1]);
         }
 
         if (W == NULL) {
             printf("error: cannot open file %s\n", argv[2]);
+        }
+
+        if (out_file == NULL) {
+            printf("error: cannot open file %s\n", argv[3]);
+        }
+
+        if (err_file == NULL) {
+            printf("error: cannot open file %s\n", argv[4]);
         }
 
         printf("Terminating, exit code 1.\n");
@@ -169,6 +179,8 @@ int main(int argc, char *argv[])
     // Close the files after use to prevent memory leaks.
     fclose(A);
     fclose(W);
+    fclose(out_file);
+    fclose(err_file);
     return 0;
 }
 
