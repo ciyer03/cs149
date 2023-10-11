@@ -3,8 +3,8 @@
  * stdout. It uses multiple child processes to achieve this a faster way.
  * Author names: Chandramouli Iyer, Safiullah Saif
  * Author emails: chandramouli.iyer@sjsu.edu, safiullah.saif@sjsu.edu
- * Last modified date: September 23rd
- * Creation date: September 23rd
+ * Last modified date: October 11th
+ * Creation date: October 4th
  **/
 
 #include <stdio.h>
@@ -38,7 +38,7 @@ void printArr(int *matrix, const int rows, const int columns);
  **/
 int main(int argc, char *argv[])
 {
-    // Checks if there are exactly four arguments (3 files, and 1 default).
+    // Checks if there are exactly five arguments (4 files, and 1 default).
     if (argc != 5) {
         fprintf(stderr, "error: expecting exactly 5 inputs.\n");
         fprintf(stderr, "Terminating, exit code 1.\n");
@@ -173,6 +173,7 @@ int main(int argc, char *argv[])
             }
         }
     }
+
     fprintf(stdout, "%s=[", argv[1]);
     printArr(&(input[0][0]), MAX_ROWS, MAX_COLUMNS);
     fprintf(stdout, "%s=[", argv[2]);
@@ -389,5 +390,6 @@ void printArr(int *matrix, const int rows, const int columns) {
 
         fprintf(stdout, "%d ", *(matrix + i));
     }
-    fprintf(stdout, "]\n");
+    fprintf(stdout, "\n]\n");
+    fflush(stdout);
 }
