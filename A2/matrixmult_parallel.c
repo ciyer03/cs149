@@ -364,15 +364,15 @@ void fillRow(int row, int *sourceMatrix, int *resultant) {
  * Returns: Nothing.
  **/
 void printArr(int *matrix, int rows, int columns) {
-    printf("Result of A*W = [\n");
+    const int product = rows * columns;
+    printf("Result of A*W = [");
     // Iterate through the matrix and print its elements in the specified format.
-    for (int i = 0; i < rows; ++i) {
-        printf("%2d  %2d  0  0  0  %2d  0  0\n", *(matrix + (i * columns) + 0),
-               *(matrix + (i * columns) + 1),
-               *(matrix + (i * columns) + 5));
+    for (int i = 0; i < product; ++i) {
+        if (i % MAX_ROWS == 0) {
+            printf("\n");
+        }
+
+        printf("%d ", *(matrix + i));
     }
-    printf("]\n");
+    printf("\n]\n");
 }
-
-
-
