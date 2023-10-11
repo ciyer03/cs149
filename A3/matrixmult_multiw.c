@@ -101,7 +101,8 @@ int main(int argc, char *argv[]) {
 
             int matrixNum = argc - (numWMatrices - i); // Gets the index of the W matrix to pass.
             fprintf(stdout, "Starting command %d: child %d pid of parent %d\n", i + 1, childPID, getppid());
-            
+            fflush(stdout); // Ensure that any pending writes have been written.
+
             // Call matrixmult with the A matrix and a W matrix specified by the index.
             if (execl("./matrixmult", "matrixmult", argv[1], argv[matrixNum], out_file, err_file, NULL) == -1) {
                 fprintf(stderr, "execl() failed. Command tried to execute: %s %s %s %s %s", "./matrixmult", 
