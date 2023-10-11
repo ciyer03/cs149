@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
         if (pid < 0) {
             printf("fork() error.");
             return 1;
-        } else if (pid > 0) {
+        } else if (pid > 0) { // Parent process
             close(preChild[0]);
             
             // Create a string that results in PID.out and PID.err, where PID is the PID of the 
@@ -64,12 +64,14 @@ int main(int argc, char *argv[]) {
             snprintf(out_file, sizeof(out_file), "%d.out", pid);
             snprintf(err_file, sizeof(err_file), "%d.err", pid);
 
+            // Give the name of the out_file to the child process.
             if (write(preChild[1], out_file, strlen(out_file)) == -1) {
                 printf("Write error for sending filename %s to child pid %d.\n", out_file, pid);
                 close(preChild[1]);
                 return 1;
             }
 
+            // Give the name of the err_file to the child process.
             if (write(preChild[1], err_file, strlen(err_file)) == -1) {
                 printf("Write error for sending filename %s to child pid %d.\n", err_file, pid);
                 close(preChild[1]);
@@ -84,7 +86,7 @@ int main(int argc, char *argv[]) {
             int childPID = getpid();
 
             // Reads in the filename created by the parent process. Mainly to ensure that the files for the 
-            // process have been created.
+            // child process have been created.
             if (read(preChild[0], out_file, strlen(out_file)) == -1) {
                 printf("Read error in child pid %d, for reading stdout filename.\n", childPID);
                 close(preChild[0]);
@@ -108,7 +110,8 @@ int main(int argc, char *argv[]) {
 
             fprintf(stdout, "Starting command %d: child %d pid of parent %d\n", i + 1, childPID, getppid());
 
-            int matrixNum = argc - (numWMatrices - i); // Gets the index of the matrix to pass.
+            int matrixNum = argc - (numWMatrices - i); // Gets the index of the W matrix to pass.
+
             // Call matrixmult with the A matrix and a W matrix specified by the index.
             if (execl("./matrixmult", "matrixmult", argv[1], argv[matrixNum], out_file, err_file, NULL) == -1) {
                 fprintf(stderr, "execl() failed. Command tried to execute: %s %s %s %s %s", "./matrixmult", 
@@ -129,19 +132,29 @@ int main(int argc, char *argv[]) {
         out_fd = open(out_file, O_WRONLY | O_APPEND, 0777);
         err_fd = open(err_file, O_WRONLY | O_APPEND, 0777);
 
+        // Redirect stdout and stderr to out_file and err_file respectively.
+        dup2(out_fd, STDOUT_FILENO);
+        dup2(err_fd, STDERR_FILENO);
+
+        fprintf(stdout, "Finished child %d pid of parent %d\n", childPID, getpid());
+
         if (WIFEXITED(wstatus)) { // Check if the child process exited normally.
             int exitStatus = WEXITSTATUS(wstatus); // Store exit code of child process.
+
             if (exitStatus == 0) { // If the child process exited with code 0 (success)
+                fprintf(stdout, "Exited with exitcode = %d\n", exitStatus);
             } else {
-                printf("Error with matrix %d. Child %d eited with code %d.\n", 
-                       (argc - (numWMatrices - i)), childPID, exitStatus);
+                fprintf(stderr, "Exited with exitcode = %d\n", exitStatus);
                 return 1;
             }
         } else if (WIFSIGNALED(wstatus)) {
-            // Implementation.
+            fprintf(stderr, "Killed with signal %d\n", WTERMSIG(wstatus));
+            return 1;
         }
 
         close(out_fd);
         close(err_fd);
+
+        return 0;
     }
 }
