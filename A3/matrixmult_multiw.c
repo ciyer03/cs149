@@ -17,7 +17,7 @@
  
 #define MAX_COLUMNS 8
 #define MAX_ROWS 8
-#define FN_SIZE 15 // File name size
+#define FN_SIZE 15 // Assuming that the filename won't extend 15 chars.
 
 /**
  * Executes the program. Accepts command line parameters.
@@ -39,12 +39,13 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    char out_file[FN_SIZE];
-    char err_file[FN_SIZE];
-    int out_fd;
-    int err_fd;
-
     int numWMatrices = argc - 2; // Gets the number of W matrces passed on the command line.
+    char *out_file[numWMatrices];
+    char *err_file[numWMatrices];
+
+    int out_fd[numWMatrices];
+    int err_fd[numWMatrices];
+    
     for (int i = 0; i < numWMatrices; ++i) {
         int preChild[2];
         if (pipe(preChild) == -1) {
@@ -53,15 +54,17 @@ int main(int argc, char *argv[]) {
         }
 
         pid_t pid = fork();
-        if (pid < 0) {
+        if (pid < 0) { // fork() failure
             printf("fork() error.");
             return 1;
-        } else if (pid == 0) {
+        } else if (pid == 0) { // Child process
             close(preChild[1]);
 
             int childPID = getpid();
             int out_size;
             int err_size;
+            char out[FN_SIZE];
+            char err[FN_SIZE];
 
             // Reads in the filename sizes for both files.
             if (read(preChild[0], &out_size, sizeof(int)) == -1) {
@@ -78,49 +81,65 @@ int main(int argc, char *argv[]) {
 
             // Reads in the filename created by the parent process. Mainly to ensure that the files for the 
             // child process have been created.
-            if (read(preChild[0], out_file, out_size) == -1) {
+            if (read(preChild[0], out, out_size) == -1) {
                 printf("Read error in child pid %d, for reading stdout filename.\n", childPID);
                 close(preChild[0]);
                 return 1;
             }
 
-            if (read(preChild[0], err_file, err_size) == -1) {
+            if (read(preChild[0], err, err_size) == -1) {
                 printf("Read error in child pid %d, for reading stderr filename.\n", childPID);
                 close(preChild[0]);
                 return 1;
             }
             close(preChild[0]);
 
+            // Add a null terminator at the end of the name.
+            out[out_size] = '\0';
+            err[err_size] = '\0';
+
+            out_file[i] = strdup(out);
+            err_file[i] = strdup(err);
+
             // Create the actual files on disk, open in write only and append mode, and ensure data integrity.
-            out_fd = open(out_file, O_WRONLY | O_CREAT | O_APPEND | O_DSYNC, 0777);
-            err_fd = open(err_file, O_WRONLY | O_CREAT | O_APPEND | O_DSYNC, 0777);
+            out_fd[i] = open(out_file[i], O_WRONLY | O_CREAT | O_APPEND | O_DSYNC, 0777);
+            err_fd[i] = open(err_file[i], O_WRONLY | O_CREAT | O_APPEND | O_DSYNC, 0777);
 
             // Redirect stdout and stderr to out_file and err_file respectively.
-            dup2(out_fd, STDOUT_FILENO);
-            dup2(err_fd, STDERR_FILENO);
+            dup2(out_fd[i], STDOUT_FILENO);
+            dup2(err_fd[i], STDERR_FILENO);
 
             int matrixNum = argc - (numWMatrices - i); // Gets the index of the W matrix to pass.
             fprintf(stdout, "Starting command %d: child %d pid of parent %d\n", i + 1, childPID, getppid());
             fflush(stdout); // Ensure that any pending writes have been written.
 
+            char *args[] = {"matrixmult_parallel", argv[1], argv[matrixNum], out_file[i], err_file[i], NULL};
             // Call matrixmult with the A matrix and a W matrix specified by the index.
-            if (execl("./matrixmult", "matrixmult", argv[1], argv[matrixNum], out_file, err_file, NULL) == -1) {
-                fprintf(stderr, "execl() failed. Command tried to execute: %s %s %s %s %s", "./matrixmult", 
-                        argv[1], argv[2], out_file, err_file);
-                close(out_fd);
-                close(err_fd);
+            if (execv("./matrixmult_parallel.o", args) == -1) {
+
+                fprintf(stderr, "execv() failed. Command tried to execute: %s %s %s %s %s\n", 
+                        "./matrixmult_parallel.o", args[1], args[2], args[3], args[4]);
+                close(out_fd[i]);
+                close(err_fd[i]);
                 return 1;
             }
-        } else {
+        } else { // Parent process
             close(preChild[0]);
+            
+            char out[FN_SIZE];
+            char err[FN_SIZE];
 
             // Create a string that results in PID.out and PID.err, where PID is the PID of the 
             // process, and store that in the char array out_file and err_file respectively.
-            snprintf(out_file, sizeof(out_file), "%d.out", pid);
-            snprintf(err_file, sizeof(err_file), "%d.err", pid);
+            int out_size = snprintf(out, sizeof(out), "%d.out", pid);
+            int err_size = snprintf(err, sizeof(err), "%d.err", pid);
 
-            int out_size = strlen(out_file);
-            int err_size = strlen(err_file);
+            // Add a null terminator at the end of the name.
+            out[out_size] = '\0';
+            err[err_size] = '\0';
+
+            out_file[i] = strdup(out);
+            err_file[i] = strdup(err);
 
             // Give the size of out_file to the child process.
             if (write(preChild[1], &out_size, sizeof(int)) == -1) {
@@ -137,15 +156,15 @@ int main(int argc, char *argv[]) {
             }
 
             // Give the name of the out_file to the child process.
-            if (write(preChild[1], out_file, out_size) == -1) {
-                printf("Write error for sending filename %s to child pid %d.\n", out_file, pid);
+            if (write(preChild[1], out_file[i], out_size) == -1) {
+                printf("Write error for sending filename %s to child pid %d.\n", out_file[i], pid);
                 close(preChild[1]);
                 return 1;
             }
 
             // Give the name of the err_file to the child process.
-            if (write(preChild[1], err_file, err_size) == -1) {
-                printf("Write error for sending filename %s to child pid %d.\n", err_file, pid);
+            if (write(preChild[1], err_file[i], err_size) == -1) {
+                printf("Write error for sending filename %s to child pid %d.\n", err_file[i], pid);
                 close(preChild[1]);
                 return 1;
             }
@@ -159,12 +178,12 @@ int main(int argc, char *argv[]) {
         int childPID = wait(&wstatus); // Wait for each child process to end.
 
         // Open the specific child's stdout and stderr files in write only and append mode.
-        out_fd = open(out_file, O_WRONLY | O_APPEND | O_DSYNC, 0777);
-        err_fd = open(err_file, O_WRONLY | O_APPEND | O_DSYNC, 0777);
+        out_fd[i] = open(out_file[i], O_WRONLY | O_APPEND | O_DSYNC, 0777);
+        err_fd[i] = open(err_file[i], O_WRONLY | O_APPEND | O_DSYNC, 0777);
 
         // Redirect stdout and stderr to out_file and err_file respectively.
-        dup2(out_fd, STDOUT_FILENO);
-        dup2(err_fd, STDERR_FILENO);
+        dup2(out_fd[i], STDOUT_FILENO);
+        dup2(err_fd[i], STDERR_FILENO);
 
         fprintf(stdout, "Finished child %d pid of parent %d\n", childPID, getpid());
 
@@ -175,16 +194,17 @@ int main(int argc, char *argv[]) {
                 fprintf(stdout, "Exited with exitcode = %d\n", exitStatus);
             } else {
                 fprintf(stderr, "Exited with exitcode = %d\n", exitStatus);
-                return 1;
             }
         } else if (WIFSIGNALED(wstatus)) {
             fprintf(stderr, "Killed with signal %d\n", WTERMSIG(wstatus));
-            return 1;
         }
 
-        close(out_fd);
-        close(err_fd);
+        fflush(stdout);
+        fflush(stderr);
 
-        return 0;
+        close(out_fd[i]);
+        close(err_fd[i]);
     }
+
+    return 0;
 }

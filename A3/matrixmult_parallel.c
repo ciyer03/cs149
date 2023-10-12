@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
     if (argc != 5) {
         fprintf(stderr, "error: expecting exactly 5 inputs.\n");
         fprintf(stderr, "Terminating, exit code 1.\n");
+        fflush(stderr);
         return 1;
     }
 
@@ -70,6 +71,7 @@ int main(int argc, char *argv[])
         }
 
         fprintf(stderr, "Terminating, exit code 1.\n");
+        fflush(stderr);
         return 1;
     }
 
@@ -92,6 +94,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < MAX_PROCESSES; ++i) {
         if (pipe(fd[i]) == -1) { // pipe() returns -1 on error.
             fprintf(stderr, "Error creating pipes.\n");
+            fflush(stderr);
             return 1;
         }
     }
@@ -120,6 +123,7 @@ int main(int argc, char *argv[])
             if (write(fd[i][1], &i, sizeof(int)) == -1) {
                 fprintf(stderr, "Error while writing row number. Problematic child: %d. Iteration: %d.\n",
                         getpid(), i);
+                fflush(stderr);
                 return 1;
             }
 
@@ -132,6 +136,7 @@ int main(int argc, char *argv[])
             if (write(fd[i][1], rowResult, sizeof(int) * MAX_COLUMNS) == -1) {
                 fprintf(stderr, "Error while writing array. Problematic child: %d. Iteration: %d.\n",
                         getpid(), i);
+                fflush(stderr);
                 return 1;
             }
 
@@ -155,12 +160,14 @@ int main(int argc, char *argv[])
                 // Reads in the row that the child process calculated.
                 if (read(fd[i][0], &rowCompleted, sizeof(int)) == -1) {
                     fprintf(stderr, "Error while reading value. Problematic child: %d\n", childPID);
+                fflush(stderr);
                     return 1;
                 }
 
                 // Reads in the row values that the child process calculated.
                 if (read(fd[i][0], rowResult, sizeof(int) * MAX_COLUMNS) == -1) {
                     fprintf(stderr, "Error while reading value. Problematic child: %d\n", childPID);
+                fflush(stderr);
                     return 1;
                 }
 
@@ -169,6 +176,7 @@ int main(int argc, char *argv[])
 
             } else { // In case the child process failed.
                 fprintf(stderr, "Child %d exited abnormally with code %d.\n", childPID, exitStatus);
+                fflush(stderr);
                 return 1;
             }
         }
@@ -180,6 +188,10 @@ int main(int argc, char *argv[])
     printArr(&(weights[0][0]), MAX_ROWS, MAX_COLUMNS);
     fprintf(stdout, "R=[");
     printArr(&(resultant[0][0]), MAX_ROWS, MAX_COLUMNS);
+
+    // Flush stdout and stderr to their respectively file descriptors immediately.
+    fflush(stdout);
+    fflush(stderr);
 
     // Close the files after use to prevent memory leaks.
     fclose(A);
