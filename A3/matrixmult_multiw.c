@@ -82,6 +82,43 @@ int main(int argc, char *argv[]) {
     }
 
     // Parent process implementation. Wait for child processes to exit.
-    
+    for (int i = 0; i < numWMatrices; ++i) {
+        int wstatus;
+        int childPID = wait(&wstatus); // Wait for each child process to end.
+
+        // Create a string that results in PID.out and PID.err, where PID is the PID of the
+        // process, and store that in the char array out_file and err_file respectively.
+        snprintf(out_file, FN_SIZE, "%d.out", childPID);
+        snprintf(err_file, FN_SIZE, "%d.err", childPID);
+
+        // Open the specific child's stdout and stderr files in write only and append mode.
+        out_fd = open(out_file, O_WRONLY | O_APPEND | O_DSYNC, 0777);
+        err_fd = open(err_file, O_WRONLY | O_APPEND | O_DSYNC, 0777);
+
+        // Redirect stdout and stderr to out_file and err_file respectively.
+        dup2(out_fd, STDOUT_FILENO);
+        dup2(err_fd, STDERR_FILENO);
+
+        fprintf(stdout, "Finished child %d pid of parent %d\n", childPID, getpid());
+
+        if (WIFEXITED(wstatus)) { // Check if the child process exited normally.
+            int exitStatus = WEXITSTATUS(wstatus); // Store exit code of child process.
+
+            if (exitStatus == 0) { // If the child process exited with code 0 (success)
+                fprintf(stdout, "Exited with exitcode = %d\n", exitStatus);
+            } else {
+                fprintf(stderr, "Exited with exitcode = %d\n", exitStatus);
+            }
+        } else if (WIFSIGNALED(wstatus)) {
+            fprintf(stderr, "Killed with signal %d\n", WTERMSIG(wstatus));
+        }
+
+        fflush(stdout);
+        fflush(stderr);
+
+        close(out_fd);
+        close(err_fd);
+    }
+
     return 0;
 }
