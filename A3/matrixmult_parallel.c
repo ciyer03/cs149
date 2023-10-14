@@ -3,8 +3,8 @@
  * stdout. It uses multiple child processes to achieve this a faster way.
  * Author names: Chandramouli Iyer, Safiullah Saif
  * Author emails: chandramouli.iyer@sjsu.edu, safiullah.saif@sjsu.edu
- * Last modified date: September 23rd
- * Creation date: September 23rd
+ * Last modified date: October 11th
+ * Creation date: October 4th
  **/
 
 #include <stdio.h>
@@ -18,11 +18,11 @@
 #define MAX_PROCESSES 8
 
 // Function prototypes. See the function declarations for more information.
-void zeroOut(int *matrix, int rows, int columns);
-void fillMatrix(int* matrix, int rows, int columns, FILE *file);
-void rowSum(int* matrix1, int* matrix2, int* product, int row);
-void fillRow(int row, int *sourceMatrix, int *resultant);
-void printArr(int *matrix, int rows, int columns);
+void zeroOut(int *matrix, const int rows, const int columns);
+void fillMatrix(int* matrix, const int rows, const int columns, FILE *file);
+void rowSum(const int *matrix1, const int *matrix2, int *product, const int row);
+void fillRow(const int row, const int *sourceMatrix, int *resultant);
+void printArr(int *matrix, const int rows, const int columns);
 
 /**
  * Executes the program. Accepts command line parameters.
@@ -38,29 +38,41 @@ void printArr(int *matrix, int rows, int columns);
  **/
 int main(int argc, char *argv[])
 {
-    // Checks if there are exactly four arguments (3 files, and 1 default).
-    if (argc != 3) {
-        printf("error: expecting exactly 2 files as input\n");
-        printf("Terminating, exit code 1.\n");
+    // Checks if there are exactly five arguments (4 files, and 1 default).
+    if (argc != 5) {
+        fprintf(stderr, "error: expecting exactly 5 inputs.\n");
+        fprintf(stderr, "Terminating, exit code 1.\n");
+        fflush(stderr);
         return 1;
     }
 
-    // Create FILE pointers for the given files, and open in read mode.
+    // Create FILE pointers for the given files, and open in read and append modes, as needed.
     FILE *A = fopen(argv[1], "r");
     FILE *W = fopen(argv[2], "r");
+    FILE *out_file = fopen(argv[3], "a");
+    FILE *err_file = fopen(argv[4], "a");
 
     // Check for invalid inputs and exit if found.
-    if (A == NULL || W == NULL) {
+    if (A == NULL || W == NULL || out_file == NULL || err_file == NULL) {
         if (A == NULL) {
-            printf("error: cannot open file %s\n", argv[1]);
+            fprintf(stderr, "error: cannot open file %s\n", argv[1]);
         }
 
         if (W == NULL) {
-            printf("error: cannot open file %s\n", argv[2]);
+            fprintf(stderr, "error: cannot open file %s\n", argv[2]);
         }
 
-        printf("Terminating, exit code 1.\n");
-        return 1; 
+        if (out_file == NULL) {
+            fprintf(stderr, "error: cannot open file %s\n", argv[3]);
+        }
+
+        if (err_file == NULL) {
+            fprintf(stderr, "error: cannot open file %s\n", argv[4]);
+        }
+
+        fprintf(stderr, "Terminating, exit code 1.\n");
+        fflush(stderr);
+        return 1;
     }
 
     int input[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8. The input matrix.
@@ -81,7 +93,8 @@ int main(int argc, char *argv[])
     // Create pipes for read/write for all processes.
     for (int i = 0; i < MAX_PROCESSES; ++i) {
         if (pipe(fd[i]) == -1) { // pipe() returns -1 on error.
-            printf("Error creating pipes.\n");
+            fprintf(stderr, "Error creating pipes.\n");
+            fflush(stderr);
             return 1;
         }
     }
@@ -108,7 +121,9 @@ int main(int argc, char *argv[])
             // Pass the row number to the parent process, and if for some reason that
             // fails, end the process.
             if (write(fd[i][1], &i, sizeof(int)) == -1) {
-                printf("Error while writing row number. Problematic child: %d. Iteration: %d.\n", getpid(), i);
+                fprintf(stderr, "Error while writing row number. Problematic child: %d. Iteration: %d.\n",
+                        getpid(), i);
+                fflush(stderr);
                 return 1;
             }
 
@@ -119,7 +134,9 @@ int main(int argc, char *argv[])
             // Pass the calculated array to the parent process, and if for some reason 
             // that fails, end the process.
             if (write(fd[i][1], rowResult, sizeof(int) * MAX_COLUMNS) == -1) {
-                printf("Error while writing array. Problematic child: %d. Iteration: %d.\n", getpid(), i);
+                fprintf(stderr, "Error while writing array. Problematic child: %d. Iteration: %d.\n",
+                        getpid(), i);
+                fflush(stderr);
                 return 1;
             }
 
@@ -142,16 +159,15 @@ int main(int argc, char *argv[])
 
                 // Reads in the row that the child process calculated.
                 if (read(fd[i][0], &rowCompleted, sizeof(int)) == -1) {
-                    printf("Error while reading value. Problematic child: %d\n", 
-                           childPID);
+                    fprintf(stderr, "Error while reading value. Problematic child: %d\n", childPID);
+                fflush(stderr);
                     return 1;
                 }
 
                 // Reads in the row values that the child process calculated.
-                if (read(fd[i][0], rowResult, sizeof(int) * MAX_COLUMNS)
-                    == -1) {
-                    printf("Error while reading value. Problematic child: %d\n", 
-                           childPID);
+                if (read(fd[i][0], rowResult, sizeof(int) * MAX_COLUMNS) == -1) {
+                    fprintf(stderr, "Error while reading value. Problematic child: %d\n", childPID);
+                fflush(stderr);
                     return 1;
                 }
 
@@ -159,16 +175,30 @@ int main(int argc, char *argv[])
                 fillRow(rowCompleted, rowResult, &(resultant[0][0]));
 
             } else { // In case the child process failed.
-                printf("Child %d exited abnormally with code %d.\n", childPID, 
-                       exitStatus);
+                fprintf(stderr, "Child %d exited abnormally with code %d.\n", childPID, exitStatus);
+                fflush(stderr);
+                return 1;
             }
         }
     }
+
+    fprintf(stdout, "%s=[", argv[1]);
+    printArr(&(input[0][0]), MAX_ROWS, MAX_COLUMNS);
+    fprintf(stdout, "%s=[", argv[2]);
+    printArr(&(weights[0][0]), MAX_ROWS, MAX_COLUMNS);
+    fprintf(stdout, "R=[");
     printArr(&(resultant[0][0]), MAX_ROWS, MAX_COLUMNS);
+
+    // Flush stdout and stderr to their respectively file descriptors immediately.
+    fflush(stdout);
+    fflush(stderr);
 
     // Close the files after use to prevent memory leaks.
     fclose(A);
     fclose(W);
+    fclose(out_file);
+    fclose(err_file);
+
     return 0;
 }
 
@@ -197,7 +227,7 @@ int main(int argc, char *argv[])
  *
  * Returns: Nothing.
  **/
-void zeroOut(int *matrix, int rows, int columns) {
+void zeroOut(int *matrix, const int rows, const int columns) {
     const int product = rows * columns; // Used to calculate the valid memory range of the matrix.
     // Iterate through the memory length (determined by product).
     for (int i = 0; i < product; ++i) {
@@ -226,7 +256,7 @@ void zeroOut(int *matrix, int rows, int columns) {
  *                   file: The file that contains the values to be filled.
  * Returns: Nothing.
  **/
-void fillMatrix(int* matrix, int rows, int columns, FILE *file) {
+void fillMatrix(int* matrix, const int rows, const int columns, FILE *file) {
 
     const int product = rows * columns; 
     int *preOp = matrix; // Store the memory address of matrix prior to manipulation.
@@ -291,7 +321,7 @@ void fillMatrix(int* matrix, int rows, int columns, FILE *file) {
  *
  * Returns: Nothing.
 **/ 
-void rowSum(int* matrix1, int* matrix2, int* product, int row) {
+void rowSum(const int* matrix1, const int* matrix2, int* product, const int row) {
     // Calculates the row to be multiplied.
     const int rowStart = row * MAX_ROWS;
 
@@ -344,7 +374,7 @@ void rowSum(int* matrix1, int* matrix2, int* product, int row) {
  *
  * Returns: Nothing.
  **/
-void fillRow(int row, int *sourceMatrix, int *resultant) {
+void fillRow(const int row, const int *sourceMatrix, int *resultant) {
     const int rowStart = row * MAX_ROWS;
 
     for (int i = 0; i < MAX_COLUMNS; ++i) {
@@ -363,16 +393,15 @@ void fillRow(int row, int *sourceMatrix, int *resultant) {
  *
  * Returns: Nothing.
  **/
-void printArr(int *matrix, int rows, int columns) {
+void printArr(int *matrix, const int rows, const int columns) {
     const int product = rows * columns;
-    printf("Result of A*W = [");
-    // Iterate through the matrix and print its elements in the specified format.
     for (int i = 0; i < product; ++i) {
         if (i % MAX_ROWS == 0) {
-            printf("\n");
+            fprintf(stdout, "\n");
         }
 
-        printf("%d ", *(matrix + i));
+        fprintf(stdout, "%d ", *(matrix + i));
     }
-    printf("\n]\n");
+    fprintf(stdout, "\n]\n");
+    fflush(stdout);
 }

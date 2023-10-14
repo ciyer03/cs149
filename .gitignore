@@ -10,8 +10,9 @@ dist/
 # Compiled object files
 *.o
 
-# Compiled object files
+# stdout and stderr files
 *.out
+*.err
 
 # Compiled Java class files
 *.class
