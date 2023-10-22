@@ -1,8 +1,8 @@
 /*
  * Description: 6.24 LAB: This program swaps 2 numbers, first with second input, and the third with fourth input
- * Author names: Safiullah Saif
- * Author emails: safiullah.saif@sjsu.edu
- * Last modified date: 10/11/2023
+ * Author names: Chandramouli Iyer and Safiullah Saif
+ * Author emails: chandramouli.iyer@sjsu.edu and safiullah.saif@sjsu.edu
+ * Last modified date: 10/16/2023
  * Creation date: 10/11/2023
  */
 
@@ -35,6 +35,10 @@ int main(void) {
  * Returns: nothing
 **/
 void SwapValues(int* userVal1, int* userVal2, int* userVal3, int* userVal4) {
-
+int temp1 = *userVal1;
+    *userVal1 = *userVal2;
+    *userVal2 = temp1;
+    int temp2 = *userVal3;
+    *userVal3 = *userVal4;
+    *userVal4 = temp2;
 }
-
