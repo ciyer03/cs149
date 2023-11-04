@@ -15,6 +15,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <time.h>
 
 #define MAX_ROWS 8
 #define MAX_COLUMNS 8
@@ -26,6 +27,9 @@ char *rMatrixFilename = "R1.txt";
 int numMatricesCalculated;
 int childResult[MAX_ROWS][MAX_COLUMNS];
 int stdoutFD;
+clock_t start, end, input_start, input_end;
+double cpu_time_used, input_time;
+
 
 int aggregateFiles();
 int getRMatrix(char *input, char** matrices, const int numMatrices);
@@ -36,6 +40,7 @@ void printRMatrix();
 void freeMem(char **matrix, int items);
 
 int main(int argc, char *argv[]) {
+    start = clock();
     int exitStatus = 0;
     if (argc < 3) {
         printf("error: expecting at least 2 files as input.\n");
@@ -82,6 +87,11 @@ int main(int argc, char *argv[]) {
     }
 
     printRMatrix();
+    end = clock();
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    cpu_time_used -= input_time;
+
+    printf("\nRun time: %f secs\n", cpu_time_used);
     return exitStatus;
 }
 
@@ -105,9 +115,12 @@ int aggregateFiles() {
     fprintf(stdout, "Enter file paths: \n");
     fflush(stdout);
 
+    input_start = clock();
     // Gathers files as user inputs. getline() automatically allocates required memory. Continues until user 
     // presses Ctrl+D.
     while (getline(&userLineBuffer, &userBufferLen, stdin) != -1) {
+        input_end = clock();
+        input_time += ((double) (input_end - input_start)) / CLOCKS_PER_SEC;
         size_t len = strlen(userLineBuffer);
 
         // Remove the trailing newline character.
@@ -181,8 +194,12 @@ int aggregateFiles() {
 
             fprintf(stdout, "Enter file paths (Ctrl+D to exit): \n");
             fflush(stdout);
+            input_start = clock();
         }
     }
+    input_end = clock();
+    input_time += ((double) (input_end - input_start)) / CLOCKS_PER_SEC;
+    
 
     // Catches some weird edge cases.
     if (userLineBuffer != NULL) { 
