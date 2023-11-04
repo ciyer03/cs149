@@ -3,10 +3,11 @@
  * stdout. It uses multiple child processes to achieve this a faster way.
  * Author names: Chandramouli Iyer, Safiullah Saif
  * Author emails: chandramouli.iyer@sjsu.edu, safiullah.saif@sjsu.edu
- * Last modified date: October 11th
- * Creation date: October 4th
+ * Last modified date: November 3rd
+ * Creation date: October 26th
  **/
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,31 +18,29 @@
 #define MAX_ROWS 8
 #define MAX_PROCESSES 8
 
+int input[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8. The input matrix.
+int weights[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8 The weights matrix.
+int resultant[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8. The resultant matrix.
+
 // Function prototypes. See the function declarations for more information.
-void zeroOut(int *matrix, const int rows, const int columns);
 void fillMatrix(int* matrix, const int rows, const int columns, FILE *file);
 void rowSum(const int *matrix1, const int *matrix2, int *product, const int row);
 void fillRow(const int row, const int *sourceMatrix, int *resultant);
 void printArr(int *matrix, const int rows, const int columns);
 
-/**
- * Executes the program. Accepts command line parameters.
- *
- * Input parameters: argc: The number of arguments that have been passed to the program.
- *                   Is at least always one, and increases as more parameters get passed.
- *                   argv[]: Contains the passed in arguments themselves in an array. 
- *                   Is at least always one (the program itself), and increases as more 
- *                   parameters get passed.
- * 
- * Returns: An integer which indicates if the program exited successfully or not. 
- * Anything apart from 0 indicates failure.
- **/
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
+
     // Checks if there are exactly five arguments (4 files, and 1 default).
-    if (argc != 5) {
+    if (argc != 6) {
         fprintf(stderr, "error: expecting exactly 5 inputs.\n");
         fprintf(stderr, "Terminating, exit code 1.\n");
+        fflush(stderr);
+        return 1;
+    }
+
+    char *isRMatrix = getenv("IS_R_MATRIX");
+    if (isRMatrix == NULL) {
+        fprintf(stderr, "Failed to fetch env variable.");
         fflush(stderr);
         return 1;
     }
@@ -72,20 +71,18 @@ int main(int argc, char *argv[])
 
         fprintf(stderr, "Terminating, exit code 1.\n");
         fflush(stderr);
+        fflush(stdout);
+
+        // Close the files after use to prevent memory leaks.
+        fclose(A);
+        fclose(W);
+        fclose(out_file);
+        fclose(err_file);
         return 1;
     }
 
-    int input[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8. The input matrix.
-    int weights[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8 The weights matrix.
-
-    zeroOut(&(input[0][0]), MAX_ROWS, MAX_COLUMNS);
-    zeroOut(&(weights[0][0]), MAX_ROWS, MAX_COLUMNS);
-
     fillMatrix(&(input[0][0]), MAX_ROWS, MAX_COLUMNS, A);
     fillMatrix(&(weights[0][0]), MAX_ROWS, MAX_COLUMNS, W);
-
-    int resultant[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8. The resultant matrix.
-    zeroOut(&(resultant[0][0]), MAX_ROWS, MAX_COLUMNS);
 
     // Create a read/write pipe for each child process.
     int fd[MAX_PROCESSES][2];
@@ -95,10 +92,17 @@ int main(int argc, char *argv[])
         if (pipe(fd[i]) == -1) { // pipe() returns -1 on error.
             fprintf(stderr, "Error creating pipes.\n");
             fflush(stderr);
+            fflush(stdout);
+
+            // Close the files after use to prevent memory leaks.
+            fclose(A);
+            fclose(W);
+            fclose(out_file);
+            fclose(err_file);
             return 1;
         }
     }
-    
+
     pid_t pid[MAX_PROCESSES]; // Hold PIDs for each child process.
 
     // Calculate dot product of each row of the matrix in a different child process.
@@ -124,6 +128,13 @@ int main(int argc, char *argv[])
                 fprintf(stderr, "Error while writing row number. Problematic child: %d. Iteration: %d.\n",
                         getpid(), i);
                 fflush(stderr);
+                fflush(stdout);
+
+                // Close the files after use to prevent memory leaks.
+                fclose(A);
+                fclose(W);
+                fclose(out_file);
+                fclose(err_file);
                 return 1;
             }
 
@@ -136,7 +147,14 @@ int main(int argc, char *argv[])
             if (write(fd[i][1], rowResult, sizeof(int) * MAX_COLUMNS) == -1) {
                 fprintf(stderr, "Error while writing array. Problematic child: %d. Iteration: %d.\n",
                         getpid(), i);
+                fflush(stdout);
                 fflush(stderr);
+
+                // Close the files after use to prevent memory leaks.
+                fclose(A);
+                fclose(W);
+                fclose(out_file);
+                fclose(err_file);
                 return 1;
             }
 
@@ -160,14 +178,28 @@ int main(int argc, char *argv[])
                 // Reads in the row that the child process calculated.
                 if (read(fd[i][0], &rowCompleted, sizeof(int)) == -1) {
                     fprintf(stderr, "Error while reading value. Problematic child: %d\n", childPID);
-                fflush(stderr);
+                    fflush(stderr);
+                    fflush(stdout);
+
+                    // Close the files after use to prevent memory leaks.
+                    fclose(A);
+                    fclose(W);
+                    fclose(out_file);
+                    fclose(err_file);
                     return 1;
                 }
 
                 // Reads in the row values that the child process calculated.
                 if (read(fd[i][0], rowResult, sizeof(int) * MAX_COLUMNS) == -1) {
                     fprintf(stderr, "Error while reading value. Problematic child: %d\n", childPID);
-                fflush(stderr);
+                    fflush(stderr);
+                    fflush(stdout);
+
+                    // Close the files after use to prevent memory leaks.
+                    fclose(A);
+                    fclose(W);
+                    fclose(out_file);
+                    fclose(err_file);
                     return 1;
                 }
 
@@ -177,17 +209,64 @@ int main(int argc, char *argv[])
             } else { // In case the child process failed.
                 fprintf(stderr, "Child %d exited abnormally with code %d.\n", childPID, exitStatus);
                 fflush(stderr);
+                fflush(stdout);
+
+                // Close the files after use to prevent memory leaks.
+                fclose(A);
+                fclose(W);
+                fclose(out_file);
+                fclose(err_file);
                 return 1;
             }
         }
     }
 
-    fprintf(stdout, "%s=[", argv[1]);
-    printArr(&(input[0][0]), MAX_ROWS, MAX_COLUMNS);
-    fprintf(stdout, "%s=[", argv[2]);
-    printArr(&(weights[0][0]), MAX_ROWS, MAX_COLUMNS);
-    fprintf(stdout, "R=[");
-    printArr(&(resultant[0][0]), MAX_ROWS, MAX_COLUMNS);
+    if (write(STDOUT_FILENO, resultant, (sizeof(int) * (MAX_ROWS * MAX_COLUMNS))) == -1) {
+        fprintf(stderr, "Error while passing 2D matrix to parent process via a pipe.\n");
+        fflush(stdout);
+        fflush(stderr);
+
+        // Close the files after use to prevent memory leaks.
+        fclose(A);
+        fclose(W);
+        fclose(out_file);
+        fclose(err_file);
+        return 1;
+    }
+    fflush(stdout);
+    
+    if (dup2(atoi(argv[5]), STDOUT_FILENO) == -1) {
+        fprintf(stderr, "Error redirecting stdout.\n");
+        fflush(stdout);
+        fflush(stderr);
+
+        // Close the files after use to prevent memory leaks.
+        fclose(A);
+        fclose(W);
+        fclose(out_file);
+        fclose(err_file);
+        return 1;
+    }
+
+    int outFD = open(argv[3], O_WRONLY | O_APPEND | O_DSYNC, 0644);
+    if (dup2(outFD, STDOUT_FILENO) == -1) {
+        fprintf(stderr, "Error redirecting stdout.\n");
+        fflush(stdout);
+        fflush(stderr);
+
+        // Close the files after use to prevent memory leaks.
+        fclose(A);
+        fclose(W);
+        fclose(out_file);
+        fclose(err_file);
+        return 1;
+    }
+
+    if (strcmp(isRMatrix, "1") == 0) {
+        fprintf(stdout, "Paths: Rsum and %s\n", argv[2]);
+    } else {
+        fprintf(stdout, "Paths: %s and %s\n", argv[1], argv[2]);
+    }
 
     // Flush stdout and stderr to their respectively file descriptors immediately.
     fflush(stdout);
@@ -199,46 +278,12 @@ int main(int argc, char *argv[])
     fclose(out_file);
     fclose(err_file);
 
-    return 0;
-}
-
-/**
- * Zeroes out the provided number of rows and columns in the given matrix. We take in 
- * the matrix as a pointer to take advantage of the fact that while declaring arrays, 
- * the OS allocates memory contiguously, and also the fact that the number of bytes 
- * allocated for an integer is consistent on the operating system. To iterate through 
- * the entire array, we only need to increment the matrix pointer by one (pointer 
- * arithmetic). To access the element at that memory address (remember we are dealing 
- * with pointers), just dereference the pointer. The advantage of this is that we don't
- * need to declare separate functions in order to handle different types of arrays. 
- * You can theoretically pass in a 1D or a 10D array and the logic will still work.
- *
- * The disadvantage is that the process is sequential, full (i.e. the entire row/column
- * will be zeroed out), and, currently, there are no protections against faulty values 
- * for rows and columns, so theoretically you can zero out memory that doesn't belong to
- * you and/or crash the program.
- *
- * Assumption: The given matrix exists and has at least the number of rows and columns
- * provided. Also that the number of rows and columns are not malicious.
- * 
- * Input parameters: matrix: The matrix to be zeroed out.
- *                   rows: The number of rows to zero out.
- *                   columns: The number of columns to zero out.
- *
- * Returns: Nothing.
- **/
-void zeroOut(int *matrix, const int rows, const int columns) {
-    const int product = rows * columns; // Used to calculate the valid memory range of the matrix.
-    // Iterate through the memory length (determined by product).
-    for (int i = 0; i < product; ++i) {
-        *(matrix) = 0; // Dereference the pointer, and zero it out.
-
-        // Increment the memory address by one. The compiler will determine 
-        // the correct step for the memory address depending on the amount of space 
-        // allocated for an integer on that specific machine.
-        matrix++;
+    if (dup2(atoi(argv[5]), STDOUT_FILENO) == -1) {
+        fprintf(stderr, "Error redirecting stdout.\n");
+        return 1;
     }
-    matrix -= product; // Return the pointer to the mem address of start of the array.
+    
+    return 0;
 }
 
 /**
@@ -382,26 +427,3 @@ void fillRow(const int row, const int *sourceMatrix, int *resultant) {
     }
 }
 
-/**
- * Prints the matrix with the specified number of rows and columns in the specified format to stdout.
- *
- * Assumption: The matrix parameter points to a valid matrix of size rows x columns.
- *
- * Input parameters: matrix: Pointer to the matrix to be printed.
- *                   rows: Number of rows in the matrix.
- *                   columns: Number of columns in the matrix.
- *
- * Returns: Nothing.
- **/
-void printArr(int *matrix, const int rows, const int columns) {
-    const int product = rows * columns;
-    for (int i = 0; i < product; ++i) {
-        if (i % MAX_ROWS == 0) {
-            fprintf(stdout, "\n");
-        }
-
-        fprintf(stdout, "%d ", *(matrix + i));
-    }
-    fprintf(stdout, "\n]\n");
-    fflush(stdout);
-}
