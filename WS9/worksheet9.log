@@ -1,0 +1,27 @@
+   55  wget http://www.apuebook.com/src.3e.tar.gz
+   57  gunzip src.3e.tar.gz
+   58  tar xvf src.3e.tar
+   60  cd apue.3e
+   61  cd proc
+   62  make all
+   63  ./fork1
+   64  ./fork2
+   65  ls
+   66  cd ..
+   69  cd signals
+   70  make all
+   71  ./sigsur &
+   72  make all
+   74  cd sigsur.c
+   75  cd ..
+   76  cd signals
+   77  ./sigusr &
+   79  ps aux
+   84  make all
+   85  ./sigusr &
+   92  kill -SIGUSR1 77109
+   93  kill -SIGUSR2 77109
+   91  kill -SIGCONT 77109
+   94  kill -9 pid
+   95  kill -9 77109
+   96  history > worksheet9.log
