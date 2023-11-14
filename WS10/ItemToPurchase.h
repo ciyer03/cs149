@@ -1,19 +1,32 @@
 /**
- * Description: 7.6 LAB*: Program: Online shopping cart (Part 1)
- *              ItemToPurchase.h - Struct definition and related function declarations
- * Author names: Chandramouli Iyer and Safiullah Saif
+ * Description: Online shopping cart (Part 1)
+ * Author names: Chandramouli Iyer, Safiullah Saif
  * Author emails: chandramouli.iyer@sjsu.edu and safiullah.saif@sjsu.edu
  * Last modified date: 11/13/2023
  * Creation date: 11/13/2023
  **/
 
-#define MAX_ITEM_NAME_SIZE 500
+#include <stdio.h>
+#include <string.h>
+#include "ItemToPurchase.h"
 
-typedef struct ItemToPurchase {
-    int itemPrice;
-    int itemQuantity;
-    char itemName[MAX_ITEM_NAME_SIZE];
-} ItemToPurchase;
+/**
+* Sets all attributes of the passed in item to their starter values.
+*
+* Input: ItemToPurchase *item = THe pointer to item to be blanked.
+**/
+void makeItemBlank(ItemToPurchase *item) {
+    strcpy(item->itemName, "none");
+    item->itemPrice = 0;
+    item->itemQuantity = 0;
+}
 
-void makeItemBlank(ItemToPurchase *item);
-void printItemCost(ItemToPurchase item);
+/**
+* Prints the name, quantity, individual price, and the total price based on the quantity and price.
+*
+* Input: item = The item whose values are to be printed.
+**/
+void printItemCost(ItemToPurchase item) {
+    printf("%s %d @ $%d = $%d\n",
+           item.itemName, item.itemQuantity, item.itemPrice, (item.itemQuantity * item.itemPrice));
+}
