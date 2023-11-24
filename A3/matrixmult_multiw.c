@@ -1,5 +1,5 @@
 /**
- * Description: This program multiplies two 8x8 matrices, and prints out the matrix to 
+ * Description: This program multiplies two 8x8 matrices, and prints out the matrix to
  * stdout. It uses multiple child processes to achieve this a faster way.
  * Author names: Chandramouli Iyer, Safiullah Saif
  * Author emails: chandramouli.iyer@sjsu.edu, safiullah.saif@sjsu.edu
@@ -21,16 +21,18 @@
  *
  * Input parameters: argc: The number of arguments that have been passed to the program.
  *                   Is at least always one, and increases as more parameters get passed.
- *                   argv[]: Contains the passed in arguments themselves in an array. 
- *                   Is at least always one (the program itself), and increases as more 
+ *                   argv[]: Contains the passed in arguments themselves in an array.
+ *                   Is at least always one (the program itself), and increases as more
  *                   parameters get passed.
- * 
- * Returns: An integer which indicates if the program exited successfully or not. 
+ *
+ * Returns: An integer which indicates if the program exited successfully or not.
  * Anything apart from 0 indicates failure.
  **/
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     // Checks if there are at least 3 arguments (2 files, and 1 default).
-    if (argc < 3) {
+    if (argc < 3)
+    {
         printf("error: expecting at least 2 files as input\n");
         printf("Terminating, exit code 1.\n");
         return 1;
@@ -40,18 +42,22 @@ int main(int argc, char *argv[]) {
     char err_file[FN_SIZE];
     int out_fd;
     int err_fd;
-    
+
     int numWMatrices = argc - 2; // Gets the number of W matrces passed on the command line.
 
-    for (int i = 0; i < numWMatrices; ++i) {
+    for (int i = 0; i < numWMatrices; ++i)
+    {
         pid_t pid = fork();
-        if (pid < 0) { // fork() failure
+        if (pid < 0)
+        { // fork() failure
             printf("fork() error.");
             return 1;
-        } else if (pid == 0) { // Child process
+        }
+        else if (pid == 0)
+        { // Child process
             int childPID = getpid();
 
-            // Create a string that results in PID.out and PID.err, where PID is the PID of the 
+            // Create a string that results in PID.out and PID.err, where PID is the PID of the
             // process, and store that in the char array out_file and err_file respectively.
             snprintf(out_file, FN_SIZE, "%d.out", childPID);
             snprintf(err_file, FN_SIZE, "%d.err", childPID);
@@ -70,9 +76,10 @@ int main(int argc, char *argv[]) {
 
             char *args[] = {"matrixmult_parallel", argv[1], argv[matrixNum], out_file, err_file, NULL};
             // Call matrixmult with the A matrix and a W matrix specified by the index.
-            if (execv("./matrixmult_parallel.o", args) == -1) {
+            if (execv("./matrixmult_parallel.o", args) == -1)
+            {
 
-                fprintf(stderr, "execv() failed. Command tried to execute: %s %s %s %s %s\n", 
+                fprintf(stderr, "execv() failed. Command tried to execute: %s %s %s %s %s\n",
                         "./matrixmult_parallel.o", args[1], args[2], args[3], args[4]);
                 close(out_fd);
                 close(err_fd);
@@ -82,7 +89,8 @@ int main(int argc, char *argv[]) {
     }
 
     // Parent process implementation. Wait for child processes to exit.
-    for (int i = 0; i < numWMatrices; ++i) {
+    for (int i = 0; i < numWMatrices; ++i)
+    {
         int wstatus;
         int childPID = wait(&wstatus); // Wait for each child process to end.
 
@@ -101,15 +109,21 @@ int main(int argc, char *argv[]) {
 
         fprintf(stdout, "Finished child %d pid of parent %d\n", childPID, getpid());
 
-        if (WIFEXITED(wstatus)) { // Check if the child process exited normally.
+        if (WIFEXITED(wstatus))
+        {                                          // Check if the child process exited normally.
             int exitStatus = WEXITSTATUS(wstatus); // Store exit code of child process.
 
-            if (exitStatus == 0) { // If the child process exited with code 0 (success)
+            if (exitStatus == 0)
+            { // If the child process exited with code 0 (success)
                 fprintf(stdout, "Exited with exitcode = %d\n", exitStatus);
-            } else {
+            }
+            else
+            {
                 fprintf(stderr, "Exited with exitcode = %d\n", exitStatus);
             }
-        } else if (WIFSIGNALED(wstatus)) {
+        }
+        else if (WIFSIGNALED(wstatus))
+        {
             fprintf(stderr, "Killed with signal %d\n", WTERMSIG(wstatus));
         }
 

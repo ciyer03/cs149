@@ -1,8 +1,8 @@
 /**
  * Description: This program multiplies the supplied A matrices, and each W matrix.
- * The program then accepts from stdin. It uses multiple child processes to achieve 
+ * The program then accepts from stdin. It uses multiple child processes to achieve
  * this a faster way.
- * 
+ *
  * Author names: Chandramouli Iyer, Safiullah Saif
  * Author emails: chandramouli.iyer@sjsu.edu, safiullah.saif@sjsu.edu
  * Last modified date: November 23rd
@@ -28,13 +28,15 @@ int realSTDOUT;
 clock_t start, end, input_start, input_end;
 double cpu_time_used, input_time;
 
-int calcResult(char* inputMatrix, char** wMatrices, const int wMatricesNum);
+int calcResult(char *inputMatrix, char **wMatrices, const int wMatricesNum);
 int gatherAMatrix(const int numWMatrices);
-void freeMem(char** dynMatrix, const int items);
+void freeMem(char **dynMatrix, const int items);
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
     start = clock();
-    if (argc < 3) {
+    if (argc < 3)
+    {
         fprintf(stderr, "You must pass in at least 2 matrices as input.\n");
         return 1;
     }
@@ -43,25 +45,30 @@ int main(int argc, char* argv[]) {
 
     int numWMatrices = argc - 2;
     // Create pipes for IPC.
-    for (int i = 0; i < numWMatrices; ++i) {
-        if (pipe(fd[i]) == -1) {
+    for (int i = 0; i < numWMatrices; ++i)
+    {
+        if (pipe(fd[i]) == -1)
+        {
             fprintf(stderr, "Pipe creation failed.\n");
             return 1;
         }
     }
 
-    char** wMatrices = (char**)malloc(sizeof(char*) * numWMatrices);
-    if (wMatrices == NULL) {
+    char **wMatrices = (char **)malloc(sizeof(char *) * numWMatrices);
+    if (wMatrices == NULL)
+    {
         fprintf(stderr, "Memory allocation failed for wMatrices.\n");
         return 1;
     }
 
     // Store the names into wMatrices.
-    for (int i = 0; i < numWMatrices; ++i) {
+    for (int i = 0; i < numWMatrices; ++i)
+    {
         wMatrices[i] = strdup(argv[i + 2]);
     }
 
-    if (calcResult(argv[1], wMatrices, numWMatrices) == 1) {
+    if (calcResult(argv[1], wMatrices, numWMatrices) == 1)
+    {
         fprintf(stderr, "Calculating result failed. Refer to prior messages for cause.\n");
         freeMem(wMatrices, numWMatrices);
         return 1;
@@ -70,7 +77,7 @@ int main(int argc, char* argv[]) {
     freeMem(wMatrices, numWMatrices);
 
     end = clock();
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
     cpu_time_used -= input_time;
 
     printf("\nRun time: %f secs\n", cpu_time_used);
@@ -85,27 +92,33 @@ int main(int argc, char* argv[]) {
  * @param inputMatrix The A matrix.
  * @param wMatrices The array containing all passed in W matrices.
  * @param wMatricesNum The number of W matrices passed in.
- * 
- * @return 1 on failure, 0 on success. On failure, check stderr and/or PID.err 
+ *
+ * @return 1 on failure, 0 on success. On failure, check stderr and/or PID.err
  * files for the reason.
  *
  **/
-int calcResult(char* inputMatrix, char** wMatrices, const int numWMatrices)
+int calcResult(char *inputMatrix, char **wMatrices, const int numWMatrices)
 {
     char outFile[FN_SIZE];
     char errFile[FN_SIZE];
     int outFD = -1;
     int errFD = -1;
 
-    for (int i = 0; i < numWMatrices; ++i) {
+    for (int i = 0; i < numWMatrices; ++i)
+    {
         pid_t pid = fork();
-        if (pid < 0) {
+        if (pid < 0)
+        {
             fprintf(stderr, "fork() failed.\n");
             return 1;
-        } else if (pid == 0) {
+        }
+        else if (pid == 0)
+        {
             // Close all unnecessary read and write ends of the pipe.
-            for (int j = 0; j < MAX_COLUMNS; ++j) {
-                if (j != i) {
+            for (int j = 0; j < MAX_COLUMNS; ++j)
+            {
+                if (j != i)
+                {
                     close(fd[j][0]);
                     close(fd[j][1]);
                 }
@@ -122,7 +135,8 @@ int calcResult(char* inputMatrix, char** wMatrices, const int numWMatrices)
             errFD = open(errFile, O_WRONLY | O_CREAT | O_APPEND | O_DSYNC, 0644);
 
             // Redirect stderr and stdout to errFile and outFile respectively.
-            if ((dup2(errFD, STDERR_FILENO) == -1) || (dup2(outFD, STDOUT_FILENO) == -1)) {
+            if ((dup2(errFD, STDERR_FILENO) == -1) || (dup2(outFD, STDOUT_FILENO) == -1))
+            {
                 fprintf(stderr, "Redirecting stderr and stdout failed.\n");
                 return 1;
             }
@@ -131,7 +145,8 @@ int calcResult(char* inputMatrix, char** wMatrices, const int numWMatrices)
             fflush(stdout); // Ensure that any pending writes have been written.
 
             // Redirect all stdin to the read end of the pipe.
-            if (dup2(fd[i][0], STDIN_FILENO) == -1) {
+            if (dup2(fd[i][0], STDIN_FILENO) == -1)
+            {
                 fprintf(stderr, "Redirecting stdin and stdout to pipe read and write ends failed.\n");
                 return 1;
             }
@@ -139,8 +154,9 @@ int calcResult(char* inputMatrix, char** wMatrices, const int numWMatrices)
             char realSOUT[12];
             snprintf(realSOUT, sizeof(realSOUT), "%d", realSTDOUT);
 
-            char* args[] = { "matrixmult_parallel", inputMatrix, wMatrices[i], realSOUT, NULL };
-            if (execv("./matrixmult_parallel.o", args) == -1) { // Error handling.
+            char *args[] = {"matrixmult_parallel", inputMatrix, wMatrices[i], realSOUT, NULL};
+            if (execv("./matrixmult_parallel.o", args) == -1)
+            { // Error handling.
                 fprintf(stderr, "execv() failed. Command tried to execute: %s %s %s %s\n", "./matrixmult_parallel.o", args[1], args[2], args[3]);
                 close(outFD);
                 close(errFD);
@@ -151,18 +167,21 @@ int calcResult(char* inputMatrix, char** wMatrices, const int numWMatrices)
         }
     }
 
-    if (dup2(realSTDOUT, STDOUT_FILENO) == -1) {
+    if (dup2(realSTDOUT, STDOUT_FILENO) == -1)
+    {
         fprintf(stderr, "Redirecting stdout to terminal failed.\n");
         return 1;
     }
 
-    if (gatherAMatrix(numWMatrices) == 1) {
+    if (gatherAMatrix(numWMatrices) == 1)
+    {
         fprintf(stdout, "Sending matrices from stdin failed. Refer to prior messages for cause.\n");
         return 1;
     }
 
     // Parent process
-    for (int i = 0; i < numWMatrices; ++i) {
+    for (int i = 0; i < numWMatrices; ++i)
+    {
         int wstatus;
         int childPID = wait(&wstatus); // Wait for each child process to end.
 
@@ -184,16 +203,22 @@ int calcResult(char* inputMatrix, char** wMatrices, const int numWMatrices)
         fprintf(stdout, "Finished child %d pid of parent %d\n", childPID, getpid());
         fflush(stdout);
 
-        if (WIFEXITED(wstatus)) { // Check if the child process exited normally.
+        if (WIFEXITED(wstatus))
+        {                                          // Check if the child process exited normally.
             int exitStatus = WEXITSTATUS(wstatus); // Store exit code of child process.
 
-            if (exitStatus == 0) { // If the child process exited with code 0 (success)
+            if (exitStatus == 0)
+            { // If the child process exited with code 0 (success)
                 fprintf(stdout, "Exited with exitcode = %d\n", exitStatus);
                 fflush(stdout);
-            } else {
+            }
+            else
+            {
                 fprintf(stderr, "Exited with exitcode = %d\n", exitStatus);
             }
-        } else if (WIFSIGNALED(wstatus)) { // Handle signals.
+        }
+        else if (WIFSIGNALED(wstatus))
+        { // Handle signals.
             fprintf(stderr, "Killed with signal %d\n", WTERMSIG(wstatus));
         }
 
@@ -204,7 +229,8 @@ int calcResult(char* inputMatrix, char** wMatrices, const int numWMatrices)
         close(fd[i][0]);
     }
 
-    if (dup2(realSTDOUT, STDOUT_FILENO) == -1) {
+    if (dup2(realSTDOUT, STDOUT_FILENO) == -1)
+    {
         fprintf(stderr, "Redirecting stdout to terminal failed.\n");
         return 1;
     }
@@ -220,44 +246,51 @@ int calcResult(char* inputMatrix, char** wMatrices, const int numWMatrices)
  * Gathers A matrices sequentially from stdin and then passes them off to the
  * child processes.
  *
- * @param numWMatrices The number of W matrices. Directly corresponds to the 
+ * @param numWMatrices The number of W matrices. Directly corresponds to the
  * number of child processes.
- * 
- * @return 1 on error, 0 on success. On failure, check stderr and/or PID.err 
+ *
+ * @return 1 on error, 0 on success. On failure, check stderr and/or PID.err
  * files for the reason.
  *
  **/
-int gatherAMatrix(const int numWMatrices) {
-    char* aMatrix = NULL;
+int gatherAMatrix(const int numWMatrices)
+{
+    char *aMatrix = NULL;
     size_t bufferLen = 0;
 
     fprintf(stdout, "Enter file path of an A Matrix: \n");
     fflush(stdout);
-    
+
     input_start = clock();
-    
-    while (getline(&aMatrix, &bufferLen, stdin) != -1) {
+
+    while (getline(&aMatrix, &bufferLen, stdin) != -1)
+    {
         input_end = clock();
-        input_time += ((double) (input_end - input_start)) / CLOCKS_PER_SEC;
+        input_time += ((double)(input_end - input_start)) / CLOCKS_PER_SEC;
         size_t len = strlen(aMatrix);
 
         // Remove the trailing newline character.
-        if (len > 0 && aMatrix[len - 1] == '\n') {
+        if (len > 0 && aMatrix[len - 1] == '\n')
+        {
             aMatrix[len - 1] = '\0';
             len--;
         }
 
-        if (len > 0) {
-            for (int i = 0; i < numWMatrices; ++i) {
+        if (len > 0)
+        {
+            for (int i = 0; i < numWMatrices; ++i)
+            {
                 // Pass the length of the file passed to each child process.
-                if (write(fd[i][1], &len, sizeof(size_t)) == -1) {
+                if (write(fd[i][1], &len, sizeof(size_t)) == -1)
+                {
                     fprintf(stderr,
-                        "Sending length of A matrix %s text to child %d failed.\n", aMatrix, i);
+                            "Sending length of A matrix %s text to child %d failed.\n", aMatrix, i);
                     return 1;
                 }
-                
+
                 // Pass the filename to each child process.
-                if (write(fd[i][1], aMatrix, len) == -1) {
+                if (write(fd[i][1], aMatrix, len) == -1)
+                {
                     fprintf(stderr, "Sending A matrix %s to child %d failed.\n", aMatrix, i);
                     return 1;
                 }
@@ -271,14 +304,16 @@ int gatherAMatrix(const int numWMatrices) {
         fprintf(stdout, "Enter file path of an A Matrix (Ctrl+D to exit): \n");
         input_start = clock();
     }
-    
+
     input_end = clock();
-    input_time += ((double) (input_end - input_start)) / CLOCKS_PER_SEC;
+    input_time += ((double)(input_end - input_start)) / CLOCKS_PER_SEC;
 
     // Indicate EOF to each child process and close all the pipes.
-    for (int i = 0; i < numWMatrices; ++i) {
+    for (int i = 0; i < numWMatrices; ++i)
+    {
         bufferLen = 0;
-        if (write(fd[i][1], &bufferLen, sizeof(size_t)) == -1) {
+        if (write(fd[i][1], &bufferLen, sizeof(size_t)) == -1)
+        {
             fprintf(stderr, "Sending EOF to child %d failed.\n", i);
             return 1;
         }
@@ -286,7 +321,8 @@ int gatherAMatrix(const int numWMatrices) {
         close(fd[i][1]);
     }
 
-    if (aMatrix != NULL) {
+    if (aMatrix != NULL)
+    {
         free(aMatrix);
         aMatrix = NULL;
     }
@@ -296,12 +332,21 @@ int gatherAMatrix(const int numWMatrices) {
 
 /**
  * Frees the memory allocated for the given matrix.
- * 
+ *
  * @attention The provided matrix must be dynamically allocated, and have EXACTLY
- *"items" number of items stored in this array. This function only frees "items" 
+ *"items" number of items stored in this array. This function only frees "items"
  * number of memory from the matrix.
- * 
+ *
  * @param matrix The dynamically allocated array whose memory needs to be freed.
  * @param items The number of items that have been stored in this array.
  *
  **/
+void freeMem(char **dynMatrix, const int items)
+{
+    for (int i = 0; i < items; ++i)
+    {
+        free(dynMatrix[i]);
+    }
+    free(dynMatrix);
+    dynMatrix = NULL;
+}
