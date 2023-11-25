@@ -43,13 +43,11 @@ void fillRow(const int row, const int *sourceMatrix, int *resultant);
 int closeAll(FILE *A, FILE *W, int *toFreeArray);
 void printArr(const int *resultant, const int size);
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 
 	// Checks if there are exactly five arguments (2 files, real STDOUT_FILENO,
 	// and 1 default).
-	if (argc != 4)
-	{
+	if (argc != 4) {
 		fprintf(stderr, "error: expecting exactly 3 inputs.\n");
 		fprintf(stderr, "Terminating, exit code 1.\n");
 		fflush(stderr);
@@ -62,15 +60,12 @@ int main(int argc, char *argv[])
 	FILE *W = fopen(argv[2], "r");
 
 	// Check for invalid inputs and exit if found.
-	if (A == NULL || W == NULL)
-	{
-		if (A == NULL)
-		{
+	if (A == NULL || W == NULL) {
+		if (A == NULL) {
 			fprintf(stderr, "error: cannot open file %s\n", argv[1]);
 		}
 
-		if (W == NULL)
-		{
+		if (W == NULL) {
 			fprintf(stderr, "error: cannot open file %s\n", argv[2]);
 		}
 
@@ -82,27 +77,24 @@ int main(int argc, char *argv[])
 	fillMatrix(&(weights[0][0]), MAX_ROWS, MAX_COLUMNS, W);
 
 	finalResultantMatrix = (int *)malloc(PRODUCT * sizeof(int));
-	if (finalResultantMatrix == NULL)
-	{
+	if (finalResultantMatrix == NULL) {
 		fprintf(stderr,
-				"Memory allocation failed. Refer to prior messages for exact "
-				"details. A matrix %s, W matrix %s.",
-				argv[1], argv[2]);
+		        "Memory allocation failed. Refer to prior messages for exact "
+		        "details. A matrix %s, W matrix %s.",
+		        argv[1], argv[2]);
 		exit(closeAll(A, W, finalResultantMatrix));
 	}
 	matrixSize += PRODUCT;
 
 	int tempResultant[MAX_ROWS][MAX_COLUMNS];
-	if (doMatrixMult(&(input[0][0]), &(tempResultant[0][0])) == 1)
-	{
+	if (doMatrixMult(&(input[0][0]), &(tempResultant[0][0])) == 1) {
 		fprintf(stderr, "Matrix Multiplication with CLI args failed.\n");
 		exit(closeAll(A, W, finalResultantMatrix));
 	}
 
 	appendToResultant(&tempResultant[0][0]);
 
-	if (readAMatrix() == 1)
-	{
+	if (readAMatrix() == 1) {
 		fprintf(stderr, "Matrix Multiplication with passed in A matrix failed.\n");
 		exit(closeAll(A, W, finalResultantMatrix));
 	}
@@ -118,8 +110,7 @@ int main(int argc, char *argv[])
 	fflush(stderr);
 
 	// Reset stdout to the terminal
-	if (dup2(atoi(argv[3]), STDOUT_FILENO) == -1)
-	{
+	if (dup2(atoi(argv[3]), STDOUT_FILENO) == -1) {
 		fprintf(stderr, "Error redirecting stdout to terminal.\n");
 		exit(closeAll(A, W, finalResultantMatrix));
 	}
@@ -147,8 +138,7 @@ int main(int argc, char *argv[])
  * @param file: The file that contains the values to be filled.
  *
  **/
-void fillMatrix(int *resultantMatrix, const int rows, const int columns, FILE *file)
-{
+void fillMatrix(int *resultantMatrix, const int rows, const int columns, FILE *file) {
 	const int product = rows * columns;
 	int *preOp = resultantMatrix; // Store the memory address of matrix prior to
 	// manipulation.
@@ -159,17 +149,14 @@ void fillMatrix(int *resultantMatrix, const int rows, const int columns, FILE *f
 
 	// Index must be less than product for the program to be in valid memory range
 	// for modification. Also check if we haven't already reached EOF.
-	while (index < product && (!feof(file)))
-	{
+	while (index < product && (!feof(file))) {
 		// Only get in if the line isn't NULL.
-		if (fgets(line, sizeof(line), file) != NULL)
-		{
+		if (fgets(line, sizeof(line), file) != NULL) {
 
 			// Check if the last character of the string is actually a newline,
 			// because in certain cases the last character may actually not be a
 			// newline, which will result in an overwrite of an actual value.
-			if (line[strlen(line) - 1] == '\n')
-			{
+			if (line[strlen(line) - 1] == '\n') {
 				line[strlen(line) - 1] = '\0'; // Get rid of newline character.
 			}
 
@@ -183,8 +170,7 @@ void fillMatrix(int *resultantMatrix, const int rows, const int columns, FILE *f
 
 			// Validate we haven't reach end of line or other errors, and are still in
 			// valid memory range.
-			while (fetch != NULL && index < product)
-			{
+			while (fetch != NULL && index < product) {
 				columnCounter--;
 				int number = atoi(fetch);	 // Convert the read in character into a numeral.
 				*(resultantMatrix) = number; // Store the numeral at the memory address.
@@ -200,8 +186,7 @@ void fillMatrix(int *resultantMatrix, const int rows, const int columns, FILE *f
 
 	// Check if the resultantMatrix pointer has been incremented. If so, return
 	// the pointer to its valid memory location (i.e start of the array.).
-	if (resultantMatrix > preOp)
-	{
+	if (resultantMatrix > preOp) {
 		resultantMatrix = preOp;
 	}
 }
@@ -214,16 +199,13 @@ void fillMatrix(int *resultantMatrix, const int rows, const int columns, FILE *f
  *
  * @return 1 on error, and 0 on successful run
  **/
-int doMatrixMult(int *aMatrix, int *tempResult)
-{
+int doMatrixMult(int *aMatrix, int *tempResult) {
 	// Create a read/write pipe for each child process.
 	int fd[MAX_PROCESSES][2];
 
 	// Create pipes for read/write for all processes.
-	for (int i = 0; i < MAX_PROCESSES; ++i)
-	{
-		if (pipe(fd[i]) == -1)
-		{
+	for (int i = 0; i < MAX_PROCESSES; ++i) {
+		if (pipe(fd[i]) == -1) {
 			// pipe() returns -1 on error.
 			fprintf(stderr, "Error creating pipes.\n");
 			exit(1);
@@ -232,40 +214,33 @@ int doMatrixMult(int *aMatrix, int *tempResult)
 
 	// Calculate dot product of each row of the matrix in a different child
 	// process.
-	for (int i = 0; i < MAX_PROCESSES; ++i)
-	{
+	for (int i = 0; i < MAX_PROCESSES; ++i) {
 
 		// Store the PID of each process. Will be 0 for child process. In the parent
 		// process, it'll the PID of the child process.
 		pid_t pid = fork(); // Hold PIDs for each child process.
 
-		if (pid < 0)
-		{
+		if (pid < 0) {
 			fprintf(stderr, "fork() failed.\n");
 			exit(1);
-		}
-		else if (pid == 0)
-		{
+		} else if (pid == 0) {
 			// If we are in the child process.
 
 			// Close unneeded read and write ends of the pipe.
-			for (int j = 0; j < MAX_PROCESSES; ++j)
-			{
+			for (int j = 0; j < MAX_PROCESSES; ++j) {
 				close(fd[j][0]); // Child processes won't read anything.
-				if (j != i)
-				{
+				if (j != i) {
 					close(fd[j][1]); // Close all write ends except the current.
 				}
 			}
 
 			// Pass the row number to the parent process, and if for some reason that
 			// fails, end the process.
-			if (write(fd[i][1], &i, sizeof(int)) == -1)
-			{
+			if (write(fd[i][1], &i, sizeof(int)) == -1) {
 				fprintf(stderr,
-						"Error while writing row number. Problematic child: %d. "
-						"Iteration: %d.\n",
-						getpid(), i);
+				        "Error while writing row number. Problematic child: %d. "
+				        "Iteration: %d.\n",
+				        getpid(), i);
 				exit(1);
 			}
 
@@ -275,12 +250,11 @@ int doMatrixMult(int *aMatrix, int *tempResult)
 
 			// Pass the calculated array to the parent process, and if for some reason
 			// that fails, end the process.
-			if (write(fd[i][1], rowResult, sizeof(int) * MAX_COLUMNS) == -1)
-			{
+			if (write(fd[i][1], rowResult, sizeof(int) * MAX_COLUMNS) == -1) {
 				fprintf(stderr,
-						"Error while writing array. Problematic child: %d. Iteration: "
-						"%d.\n",
-						getpid(), i);
+				        "Error while writing array. Problematic child: %d. Iteration: "
+				        "%d.\n",
+				        getpid(), i);
 				exit(1);
 			}
 
@@ -290,19 +264,16 @@ int doMatrixMult(int *aMatrix, int *tempResult)
 	}
 
 	// Parent process.
-	for (int i = 0; i < MAX_PROCESSES; ++i)
-	{
+	for (int i = 0; i < MAX_PROCESSES; ++i) {
 		int wstatus;
 		int childPID = wait(&wstatus); // Wait for each child process to end.
 
-		if (WIFEXITED(wstatus))
-		{
+		if (WIFEXITED(wstatus)) {
 			// Check if the child process exited normally.
 			int exitStatus =
-				WEXITSTATUS(wstatus); // Store exit code of child process.
+			    WEXITSTATUS(wstatus); // Store exit code of child process.
 			if (exitStatus ==
-				0)
-			{
+			        0) {
 				// If the child process exited with code 0 (success)
 				// Holds the row values returned by the child process.
 				int rowResult[MAX_COLUMNS];
@@ -310,29 +281,25 @@ int doMatrixMult(int *aMatrix, int *tempResult)
 				int rowCompleted; // The row that the child process calculated.
 
 				// Reads in the row that the child process calculated.
-				if (read(fd[i][0], &rowCompleted, sizeof(int)) == -1)
-				{
+				if (read(fd[i][0], &rowCompleted, sizeof(int)) == -1) {
 					fprintf(stderr, "Error while reading value. Problematic child: %d\n",
-							childPID);
+					        childPID);
 					exit(1);
 				}
 
 				// Reads in the row values that the child process calculated.
-				if (read(fd[i][0], rowResult, sizeof(int) * MAX_COLUMNS) == -1)
-				{
+				if (read(fd[i][0], rowResult, sizeof(int) * MAX_COLUMNS) == -1) {
 					fprintf(stderr, "Error while reading value. Problematic child: %d\n",
-							childPID);
+					        childPID);
 					exit(1);
 				}
 
 				close(fd[i][0]); // Close the read pipe after use.
 				fillRow(rowCompleted, rowResult, tempResult);
-			}
-			else
-			{
+			} else {
 				// In case the child process failed.
 				fprintf(stderr, "Child %d exited abnormally with code %d.\n", childPID,
-						exitStatus);
+				        exitStatus);
 				exit(1);
 			}
 		}
@@ -346,26 +313,21 @@ int doMatrixMult(int *aMatrix, int *tempResult)
  * in W matrix.
  *
  **/
-int readAMatrix()
-{
-	while (1)
-	{
+int readAMatrix() {
+	while (1) {
 		size_t bufferLen;
 
-		if (read(STDIN_FILENO, &bufferLen, sizeof(size_t)) == 0)
-		{
+		if (read(STDIN_FILENO, &bufferLen, sizeof(size_t)) == 0) {
 			break;
 		}
 
-		if (bufferLen == 0)
-		{
+		if (bufferLen == 0) {
 			break;
 		}
 
 		char aMatrixFile[bufferLen + 1];
 
-		if (read(STDIN_FILENO, aMatrixFile, bufferLen) == -1)
-		{
+		if (read(STDIN_FILENO, aMatrixFile, bufferLen) == -1) {
 			fprintf(stderr, "Error copying A matrix filename from pipe.\n");
 			return 1;
 		}
@@ -373,10 +335,9 @@ int readAMatrix()
 		aMatrixFile[bufferLen] = '\0';
 
 		FILE *aMatrix = fopen(aMatrixFile, "r");
-		if (aMatrix == NULL)
-		{
+		if (aMatrix == NULL) {
 			fprintf(stderr, "error: cannot open file %s read in from stdin\n",
-					aMatrixFile);
+			        aMatrixFile);
 			fprintf(stderr, "Terminating, exit code 1.\n");
 			return 1;
 		}
@@ -386,19 +347,17 @@ int readAMatrix()
 
 		fillMatrix(&(tempA[0][0]), MAX_ROWS, MAX_COLUMNS, aMatrix);
 
-		int tempAResult[0][0];
+		int tempAResult[MAX_ROWS][MAX_COLUMNS];
 		memset(tempAResult, 0, sizeof(tempAResult));
 
-		if (doMatrixMult(&(tempA[0][0]), &(tempAResult[0][0])))
-		{
+		if ((doMatrixMult(&(tempA[0][0]), &(tempAResult[0][0]))) == 1) {
 			fprintf(stderr, "Matrix Multiplication with stdin args failed.\n");
 			return 1;
 		}
 
 		matrixSize += PRODUCT;
 		int *tempResultArray = (int *)realloc(finalResultantMatrix, matrixSize * sizeof(int));
-		if (tempResultArray == NULL)
-		{
+		if (tempResultArray == NULL) {
 			fprintf(stderr, "realloc() failed for matrix %s.", aMatrixFile);
 			matrixSize -= PRODUCT;
 			return 1;
@@ -418,11 +377,9 @@ int readAMatrix()
  *
  * @param tempResult The array whose values are to be appended.
  **/
-void appendToResultant(int *tempResult)
-{
+void appendToResultant(int *tempResult) {
 	int *resultStart = finalResultantMatrix + (matrixSize - PRODUCT);
-	for (int i = 0; i < PRODUCT; ++i)
-	{
+	for (int i = 0; i < PRODUCT; ++i) {
 		*(resultStart + i) = *(tempResult + i);
 	}
 }
@@ -439,21 +396,18 @@ void appendToResultant(int *tempResult)
  * @param product Matrix in which the dot product will be stored. Must be of size 1x8.
  *
  **/
-void rowSum(const int *matrix1, const int *matrix2, int *product, const int row)
-{
+void rowSum(const int *matrix1, const int *matrix2, int *product, const int row) {
 	// Calculates the row to be multiplied.
 	const int rowStart = row * MAX_ROWS;
 
 	// Loop calculates the dot product of matrix1 and matrix2, and stores the
 	// result in product.
-	for (int i = 0; i < MAX_COLUMNS; ++i)
-	{
+	for (int i = 0; i < MAX_COLUMNS; ++i) {
 		// Stores the result of multiplication of the entire row and column.
 		int result = 0;
 
 		// Loop calculates single row and single column multiplication.
-		for (int j = 0; j < MAX_ROWS; ++j)
-		{
+		for (int j = 0; j < MAX_ROWS; ++j) {
 
 			/**
 			 * Multiplies one row and one column and stores the output in result.
@@ -494,11 +448,9 @@ void rowSum(const int *matrix1, const int *matrix2, int *product, const int row)
  * @param resultant: The resultant matrix to be filled.
  *
  **/
-void fillRow(const int row, const int *sourceMatrix, int *resultant)
-{
+void fillRow(const int row, const int *sourceMatrix, int *resultant) {
 	const int rowStart = row * MAX_ROWS;
-	for (int i = 0; i < MAX_COLUMNS; ++i)
-	{
+	for (int i = 0; i < MAX_COLUMNS; ++i) {
 		*(resultant + (rowStart + i)) = *(sourceMatrix + i);
 	}
 }
@@ -513,28 +465,23 @@ void fillRow(const int row, const int *sourceMatrix, int *resultant)
  * @return
  *
  **/
-int closeAll(FILE *A, FILE *W, int *toFreeArray)
-{
+int closeAll(FILE *A, FILE *W, int *toFreeArray) {
 	fflush(stdout);
 	fflush(stderr);
 
 	// Close the files after use to prevent memory leaks.
-	if (A == NULL || W == NULL)
-	{
-		if (A != NULL)
-		{
+	if (A == NULL || W == NULL) {
+		if (A != NULL) {
 			fclose(A);
 		}
 
-		if (W != NULL)
-		{
+		if (W != NULL) {
 			fclose(W);
 		}
 	}
 
 	// Free allocated memory
-	if (toFreeArray != NULL)
-	{
+	if (toFreeArray != NULL) {
 		free(toFreeArray);
 		toFreeArray = NULL;
 	}
@@ -550,12 +497,9 @@ int closeAll(FILE *A, FILE *W, int *toFreeArray)
  * @param resultant The array whose values are to be printed.
  * @param size Size of the array.
  **/
-void printArr(const int *resultant, const int size)
-{
-	for (int i = 0; i < size; ++i)
-	{
-		if ((i != 0) && (i % MAX_COLUMNS == 0))
-		{
+void printArr(const int *resultant, const int size) {
+	for (int i = 0; i < size; ++i) {
+		if ((i != 0) && (i % MAX_COLUMNS == 0)) {
 			fprintf(stdout, "\n");
 		}
 		fprintf(stdout, "%d ", *(resultant + i));
