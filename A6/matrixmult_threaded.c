@@ -30,37 +30,39 @@
 #define PRODUCT (MAX_ROWS * MAX_COLUMNS)
 #define THREAD_NUM 64
 
-int input[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8. The input matrix.
+int input[MAX_ROWS][MAX_COLUMNS];   // Matrix of size 8x8. The input matrix.
 int weights[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8 The weights matrix.
-int* finalResultantMatrix;
+int *finalResultantMatrix;
 int matrixSize;
 pthread_mutex_t writeToRMutex;
 
-void fillMatrix(int* resultantMatrix, const int rows, const int columns,
-    FILE* file);
-int calcResult(const int* aMatrix, const int* wMatrix, int* result);
-void* doMatrixMult(void* args);
+void fillMatrix(int *resultantMatrix, const int rows, const int columns,
+                FILE *file);
+int calcResult(const int *aMatrix, const int *wMatrix, int *result);
+void *doMatrixMult(void *args);
 int readAMatrix();
-void appendToResultant(int* tempResult);
-void rowSum(const int* matrix1, const int* matrix2, int* product, const int row,
-    const int column);
-void fillRow(const int row, const int* sourceMatrix, int* resultant);
-int closeAll(FILE* A, FILE* W, int* toFreeArray, pthread_mutex_t* mutex);
-void printArr(const int* resultant, const int size);
+void appendToResultant(int *tempResult);
+void rowSum(const int *matrix1, const int *matrix2, int *product, const int row,
+            const int column);
+void fillRow(const int row, const int *sourceMatrix, int *resultant);
+int closeAll(FILE *A, FILE *W, int *toFreeArray, pthread_mutex_t *mutex);
+void printArr(const int *resultant, const int size);
 
-typedef struct MatrixData {
-    const int* aMatrix;
-    const int* wMatrix;
-    int* result;
+typedef struct MatrixData
+{
+    const int *aMatrix;
+    const int *wMatrix;
+    int *result;
     int cell;
 } MatrixData;
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
 
     // Checks if there are exactly five arguments (2 files, real STDOUT_FILENO,
     // and 1 default).
-    if (argc != 4) {
+    if (argc != 4)
+    {
         fprintf(stderr, "error: expecting exactly 3 inputs.\n");
         fprintf(stderr, "Terminating, exit code 1.\n");
         fflush(stderr);
@@ -69,16 +71,19 @@ int main(int argc, char* argv[])
 
     // Create FILE pointers for the given files, and open in read and append
     // modes, as needed.
-    FILE* A = fopen(argv[1], "r");
-    FILE* W = fopen(argv[2], "r");
+    FILE *A = fopen(argv[1], "r");
+    FILE *W = fopen(argv[2], "r");
 
     // Check for invalid inputs and exit if found.
-    if (A == NULL || W == NULL) {
-        if (A == NULL) {
+    if (A == NULL || W == NULL)
+    {
+        if (A == NULL)
+        {
             fprintf(stderr, "error: cannot open file %s\n", argv[1]);
         }
 
-        if (W == NULL) {
+        if (W == NULL)
+        {
             fprintf(stderr, "error: cannot open file %s\n", argv[2]);
         }
 
@@ -89,23 +94,26 @@ int main(int argc, char* argv[])
     fillMatrix(&(input[0][0]), MAX_ROWS, MAX_COLUMNS, A);
     fillMatrix(&(weights[0][0]), MAX_ROWS, MAX_COLUMNS, W);
 
-    finalResultantMatrix = (int*)malloc(PRODUCT * sizeof(int));
-    if (finalResultantMatrix == NULL) {
+    finalResultantMatrix = (int *)malloc(PRODUCT * sizeof(int));
+    if (finalResultantMatrix == NULL)
+    {
         fprintf(stderr,
-            "Memory allocation failed. Refer to prior messages for exact "
-            "details. A matrix %s, W matrix %s.",
-            argv[1], argv[2]);
+                "Memory allocation failed. Refer to prior messages for exact "
+                "details. A matrix %s, W matrix %s.",
+                argv[1], argv[2]);
         exit(closeAll(A, W, finalResultantMatrix, NULL));
     }
     matrixSize += PRODUCT;
 
     pthread_mutex_init(&writeToRMutex, NULL);
-    if (calcResult(&(input[0][0]), &(weights[0][0]), finalResultantMatrix) == 1) {
+    if (calcResult(&(input[0][0]), &(weights[0][0]), finalResultantMatrix) == 1)
+    {
         fprintf(stderr, "Matrix Multiplication with CLI args failed.\n");
         exit(closeAll(A, W, finalResultantMatrix, &writeToRMutex));
     }
 
-    if (readAMatrix() == 1) {
+    if (readAMatrix() == 1)
+    {
         fprintf(stderr, "Matrix Multiplication with passed in A matrix failed.\n");
         exit(closeAll(A, W, finalResultantMatrix, &writeToRMutex));
     }
@@ -123,7 +131,8 @@ int main(int argc, char* argv[])
     fflush(stderr);
 
     // Reset stdout to the terminal
-    if (dup2(atoi(argv[3]), STDOUT_FILENO) == -1) {
+    if (dup2(atoi(argv[3]), STDOUT_FILENO) == -1)
+    {
         fprintf(stderr, "Error redirecting stdout to terminal.\n");
         exit(closeAll(A, W, finalResultantMatrix, NULL));
     }
@@ -151,11 +160,11 @@ int main(int argc, char* argv[])
  * @param file: The file that contains the values to be filled.
  *
  **/
-void fillMatrix(int* resultantMatrix, const int rows, const int columns,
-    FILE* file)
+void fillMatrix(int *resultantMatrix, const int rows, const int columns,
+                FILE *file)
 {
     const int product = rows * columns;
-    int* preOp = resultantMatrix; // Store the memory address of matrix prior to
+    int *preOp = resultantMatrix; // Store the memory address of matrix prior to
     // manipulation.
     int index = 0; // Tracks how far into valid memory we are in.
 
@@ -164,18 +173,21 @@ void fillMatrix(int* resultantMatrix, const int rows, const int columns,
 
     // Index must be less than product for the program to be in valid memory range
     // for modification. Also check if we haven't already reached EOF.
-    while (index < product && (!feof(file))) {
+    while (index < product && (!feof(file)))
+    {
         // Only get in if the line isn't NULL.
-        if (fgets(line, sizeof(line), file) != NULL) {
+        if (fgets(line, sizeof(line), file) != NULL)
+        {
 
             // Check if the last character of the string is actually a newline,
             // because in certain cases the last character may actually not be a
             // newline, which will result in an overwrite of an actual value.
-            if (line[strlen(line) - 1] == '\n') {
+            if (line[strlen(line) - 1] == '\n')
+            {
                 line[strlen(line) - 1] = '\0'; // Get rid of newline character.
             }
 
-            char* fetch = strtok(line, " "); // Read in a number. They are separated
+            char *fetch = strtok(line, " "); // Read in a number. They are separated
             // by spaces in the file.
 
             // Keeps track of how many columns have been traversed. Required so that
@@ -185,14 +197,15 @@ void fillMatrix(int* resultantMatrix, const int rows, const int columns,
 
             // Validate we haven't reach end of line or other errors, and are still in
             // valid memory range.
-            while (fetch != NULL && index < product) {
+            while (fetch != NULL && index < product)
+            {
                 columnCounter--;
-                int number = atoi(fetch); // Convert the read in character into a numeral.
+                int number = atoi(fetch);    // Convert the read in character into a numeral.
                 *(resultantMatrix) = number; // Store the numeral at the memory address.
-                resultantMatrix++; // Increment to the next memory address of the array.
+                resultantMatrix++;           // Increment to the next memory address of the array.
                 // Valid
                 // increments are OS specific and will be handled by compiler.
-                index++; // Increment the valid memory validator.
+                index++;                   // Increment the valid memory validator.
                 fetch = strtok(NULL, " "); // Read in the next numeral.
             }
             resultantMatrix += columnCounter;
@@ -201,7 +214,8 @@ void fillMatrix(int* resultantMatrix, const int rows, const int columns,
 
     // Check if the resultantMatrix pointer has been incremented. If so, return
     // the pointer to its valid memory location (i.e start of the array.).
-    if (resultantMatrix > preOp) {
+    if (resultantMatrix > preOp)
+    {
         resultantMatrix = preOp;
     }
 }
@@ -220,25 +234,29 @@ void fillMatrix(int* resultantMatrix, const int rows, const int columns,
  * @return 1 on error, 0 on success
  *
  **/
-int calcResult(const int* aMatrix, const int* wMatrix, int* result)
+int calcResult(const int *aMatrix, const int *wMatrix, int *result)
 {
     pthread_t cells[THREAD_NUM];
-    for (int i = 0; i < THREAD_NUM; ++i) {
-        MatrixData* md = (MatrixData*)malloc(sizeof(MatrixData));
+    for (int i = 0; i < THREAD_NUM; ++i)
+    {
+        MatrixData *md = (MatrixData *)malloc(sizeof(MatrixData));
         md->aMatrix = aMatrix;
         md->wMatrix = wMatrix;
         md->result = result;
         md->cell = i;
 
-        if (pthread_create(&cells[i], NULL, &doMatrixMult, md) != 0) {
+        if (pthread_create(&cells[i], NULL, &doMatrixMult, md) != 0)
+        {
             fprintf(stderr, "Error while creating thread %d\n", i);
             free(md);
             return 1;
         }
     }
 
-    for (int i = 0; i < THREAD_NUM; ++i) {
-        if (pthread_join(cells[i], NULL) != 0) {
+    for (int i = 0; i < THREAD_NUM; ++i)
+    {
+        if (pthread_join(cells[i], NULL) != 0)
+        {
             fprintf(stderr, "Error while waiting for thread %d\n", i);
             return 1;
         }
@@ -253,10 +271,17 @@ int calcResult(const int* aMatrix, const int* wMatrix, int* result)
  * @param args a dynamically allocated array containing the A, W, Result, and
  *index variables.
  *
- * @return 1 on error, and 0 on successful run
  **/
-void* doMatrixMult(void* args) {
+void *doMatrixMult(void *args)
+{
+    MatrixData md = *(MatrixData *)args;
+    int matrixColumn = md.cell % 8; // Column in array form. So a value of 1 would be the 2nd columm
+    int matrixRow = md.cell / 8;    // Row in array form. So a value of 1 would be the 2nd row
 
+    rowSum(md.aMatrix, md.wMatrix, md.result, matrixRow, matrixColumn);
+
+    free(args);
+    return NULL;
 }
 
 /**
@@ -272,15 +297,16 @@ void* doMatrixMult(void* args) {
  * @param column The column to multiply
  *
  **/
-void rowSum(const int* matrix1, const int* matrix2, int* product, const int row,
-    const int column)
+void rowSum(const int *matrix1, const int *matrix2, int *product, const int row,
+            const int column)
 {
     // Calculates the row to be multiplied.
     const int rowStart = row * MAX_ROWS;
     int result = 0;
 
     // Loop calculates single row and single column multiplication.
-    for (int i = 0; i < MAX_ROWS; ++i) {
+    for (int i = 0; i < MAX_ROWS; ++i)
+    {
         const int rowIncrement = rowStart + i;
         const int columnIncrement = (i * MAX_COLUMNS) + column;
         result += (*(matrix1 + rowIncrement)) * (*(matrix2 + columnIncrement));
@@ -303,30 +329,35 @@ void rowSum(const int* matrix1, const int* matrix2, int* product, const int row,
  **/
 int readAMatrix()
 {
-    while (1) {
+    while (1)
+    {
         size_t bufferLen;
 
-        if (read(STDIN_FILENO, &bufferLen, sizeof(size_t)) == 0) {
+        if (read(STDIN_FILENO, &bufferLen, sizeof(size_t)) == 0)
+        {
             break;
         }
 
-        if (bufferLen == 0) {
+        if (bufferLen == 0)
+        {
             break;
         }
 
         char aMatrixFile[bufferLen + 1];
 
-        if (read(STDIN_FILENO, aMatrixFile, bufferLen) == -1) {
+        if (read(STDIN_FILENO, aMatrixFile, bufferLen) == -1)
+        {
             fprintf(stderr, "Error copying A matrix filename from pipe.\n");
             return 1;
         }
 
         aMatrixFile[bufferLen] = '\0';
 
-        FILE* aMatrix = fopen(aMatrixFile, "r");
-        if (aMatrix == NULL) {
+        FILE *aMatrix = fopen(aMatrixFile, "r");
+        if (aMatrix == NULL)
+        {
             fprintf(stderr, "error: cannot open file %s read in from stdin\n",
-                aMatrixFile);
+                    aMatrixFile);
             fprintf(stderr, "Terminating, exit code 1.\n");
             return 1;
         }
@@ -337,8 +368,9 @@ int readAMatrix()
         fillMatrix(&(tempA[0][0]), MAX_ROWS, MAX_COLUMNS, aMatrix);
 
         matrixSize += PRODUCT;
-        int* tempResultArray = (int*)realloc(finalResultantMatrix, matrixSize * sizeof(int));
-        if (tempResultArray == NULL) {
+        int *tempResultArray = (int *)realloc(finalResultantMatrix, matrixSize * sizeof(int));
+        if (tempResultArray == NULL)
+        {
             fprintf(stderr, "realloc() failed for matrix %s.", aMatrixFile);
             matrixSize -= PRODUCT;
             return 1;
@@ -346,8 +378,8 @@ int readAMatrix()
         finalResultantMatrix = tempResultArray;
 
         if ((calcResult(&(tempA[0][0]), &(weights[0][0]),
-                (finalResultantMatrix + (matrixSize - PRODUCT))))
-            == 1) {
+                        (finalResultantMatrix + (matrixSize - PRODUCT)))) == 1)
+        {
             fprintf(stderr, "Matrix Multiplication with stdin args failed.\n");
             return 1;
         }
@@ -366,30 +398,35 @@ int readAMatrix()
  * @return
  *
  **/
-int closeAll(FILE* A, FILE* W, int* toFreeArray, pthread_mutex_t* mutex)
+int closeAll(FILE *A, FILE *W, int *toFreeArray, pthread_mutex_t *mutex)
 {
     fflush(stdout);
     fflush(stderr);
 
     // Close the files after use to prevent memory leaks.
-    if (A == NULL || W == NULL) {
-        if (A != NULL) {
+    if (A == NULL || W == NULL)
+    {
+        if (A != NULL)
+        {
             fclose(A);
         }
 
-        if (W != NULL) {
+        if (W != NULL)
+        {
             fclose(W);
         }
     }
 
     // Free allocated memory
-    if (toFreeArray != NULL) {
+    if (toFreeArray != NULL)
+    {
         free(toFreeArray);
         toFreeArray = NULL;
     }
 
     // Destroy resources allocated for the mutex
-    if (mutex != NULL) {
+    if (mutex != NULL)
+    {
         pthread_mutex_destroy(mutex);
     }
 
@@ -404,10 +441,12 @@ int closeAll(FILE* A, FILE* W, int* toFreeArray, pthread_mutex_t* mutex)
  * @param resultant The array whose values are to be printed.
  * @param size Size of the array.
  **/
-void printArr(const int* resultant, const int size)
+void printArr(const int *resultant, const int size)
 {
-    for (int i = 0; i < size; ++i) {
-        if ((i != 0) && (i % MAX_COLUMNS == 0)) {
+    for (int i = 0; i < size; ++i)
+    {
+        if ((i != 0) && (i % MAX_COLUMNS == 0))
+        {
             fprintf(stdout, "\n");
         }
         fprintf(stdout, "%d ", *(resultant + i));
