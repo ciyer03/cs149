@@ -11,10 +11,10 @@
  * process. The whole matrix multiplication process is done using multiple
  * child processes to achieve this a faster way.
  *
- * Author names: Chandramouli Iyer, Safiullah Saif
- * Author emails: chandramouli.iyer@sjsu.edu, safiullah.saif@sjsu.edu
- * Last modified date: November 23rd
- * Creation date: October 26th
+ * Author names: Chandramouli Iyer
+ * Author emails: chandramouli.iyer@sjsu.edu
+ * Last modified date: December 6th
+ * Creation date: December 6th
  **/
 
 #include <fcntl.h>
@@ -29,19 +29,19 @@
 #define MAX_PROCESSES 8
 #define PRODUCT (MAX_ROWS * MAX_COLUMNS)
 
-int input[MAX_ROWS][MAX_COLUMNS];	// Matrix of size 8x8. The input matrix.
-int weights[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8 The weights matrix.
-int *finalResultantMatrix;
+double input[MAX_ROWS][MAX_COLUMNS];	// Matrix of size 8x8. The input matrix.
+double weights[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8 The weights matrix.
+double *finalResultantMatrix;
 int matrixSize;
 
-void fillMatrix(int *resultantMatrix, const int rows, const int columns, FILE *file);
-int doMatrixMult(int *aMatrix, int *tempResult);
+void fillMatrix(double *resultantMatrix, const int rows, const int columns, FILE *file);
+int doMatrixMult(double *aMatrix, double *tempResult);
 int readAMatrix();
-void appendToResultant(int *tempResult);
-void rowSum(const int *matrix1, const int *matrix2, int *product, const int row);
-void fillRow(const int row, const int *sourceMatrix, int *resultant);
-int closeAll(FILE *A, FILE *W, int *toFreeArray);
-void printArr(const int *resultant, const int size);
+void appendToResultant(double *tempResult);
+void rowSum(const double *matrix1, const double *matrix2, double *product, const int row);
+void fillRow(const int row, const double *sourceMatrix, double *resultant);
+int closeAll(FILE *A, FILE *W, double *toFreeArray);
+void printArr(const double *resultant, const int size);
 
 int main(int argc, char *argv[]) {
 
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 	fillMatrix(&(input[0][0]), MAX_ROWS, MAX_COLUMNS, A);
 	fillMatrix(&(weights[0][0]), MAX_ROWS, MAX_COLUMNS, W);
 
-	finalResultantMatrix = (int *)malloc(PRODUCT * sizeof(int));
+	finalResultantMatrix = (double *)malloc(PRODUCT * sizeof(double));
 	if (finalResultantMatrix == NULL) {
 		fprintf(stderr,
 		        "Memory allocation failed. Refer to prior messages for exact "
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 	}
 	matrixSize += PRODUCT;
 
-	int tempResultant[MAX_ROWS][MAX_COLUMNS];
+	double tempResultant[MAX_ROWS][MAX_COLUMNS];
 	if (doMatrixMult(&(input[0][0]), &(tempResultant[0][0])) == 1) {
 		fprintf(stderr, "Matrix Multiplication with CLI args failed.\n");
 		exit(closeAll(A, W, finalResultantMatrix));
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
 	fprintf(stdout, "R = [ \n");
 	printArr(finalResultantMatrix, matrixSize);
 	free(finalResultantMatrix);
-    finalResultantMatrix = NULL;
+	finalResultantMatrix = NULL;
 
 	// Flush stdout and stderr to their respective file descriptors immediately.
 	fflush(stdout);
@@ -139,9 +139,9 @@ int main(int argc, char *argv[]) {
  * @param file: The file that contains the values to be filled.
  *
  **/
-void fillMatrix(int *resultantMatrix, const int rows, const int columns, FILE *file) {
+void fillMatrix(double *resultantMatrix, const int rows, const int columns, FILE *file) {
 	const int product = rows * columns;
-	int *preOp = resultantMatrix; // Store the memory address of matrix prior to
+	double *preOp = resultantMatrix; // Store the memory address of matrix prior to
 	// manipulation.
 	int index = 0; // Tracks how far into valid memory we are in.
 
@@ -200,7 +200,7 @@ void fillMatrix(int *resultantMatrix, const int rows, const int columns, FILE *f
  *
  * @return 1 on error, and 0 on successful run
  **/
-int doMatrixMult(int *aMatrix, int *tempResult) {
+int doMatrixMult(double *aMatrix, double *tempResult) {
 	// Create a read/write pipe for each child process.
 	int fd[MAX_PROCESSES][2];
 
@@ -246,12 +246,12 @@ int doMatrixMult(int *aMatrix, int *tempResult) {
 			}
 
 			// Calculate and store the row specific dot product.
-			int rowResult[MAX_COLUMNS];
+			double rowResult[MAX_COLUMNS];
 			rowSum(aMatrix, &(weights[0][0]), rowResult, i);
 
 			// Pass the calculated array to the parent process, and if for some reason
 			// that fails, end the process.
-			if (write(fd[i][1], rowResult, sizeof(int) * MAX_COLUMNS) == -1) {
+			if (write(fd[i][1], rowResult, sizeof(double) * MAX_COLUMNS) == -1) {
 				fprintf(stderr,
 				        "Error while writing array. Problematic child: %d. Iteration: "
 				        "%d.\n",
@@ -277,7 +277,7 @@ int doMatrixMult(int *aMatrix, int *tempResult) {
 			        0) {
 				// If the child process exited with code 0 (success)
 				// Holds the row values returned by the child process.
-				int rowResult[MAX_COLUMNS];
+				double rowResult[MAX_COLUMNS];
 
 				int rowCompleted; // The row that the child process calculated.
 
@@ -289,7 +289,7 @@ int doMatrixMult(int *aMatrix, int *tempResult) {
 				}
 
 				// Reads in the row values that the child process calculated.
-				if (read(fd[i][0], rowResult, sizeof(int) * MAX_COLUMNS) == -1) {
+				if (read(fd[i][0], rowResult, sizeof(double) * MAX_COLUMNS) == -1) {
 					fprintf(stderr, "Error while reading value. Problematic child: %d\n",
 					        childPID);
 					exit(1);
@@ -343,13 +343,13 @@ int readAMatrix() {
 			return 1;
 		}
 
-		int tempA[MAX_ROWS][MAX_COLUMNS];
-		memset(tempA, 0, sizeof(tempA));
+		double tempA[MAX_ROWS][MAX_COLUMNS];
+		memset(tempA, 0, sizeof(double) * (MAX_ROWS * MAX_COLUMNS));
 
 		fillMatrix(&(tempA[0][0]), MAX_ROWS, MAX_COLUMNS, aMatrix);
 
-		int tempAResult[MAX_ROWS][MAX_COLUMNS];
-		memset(tempAResult, 0, sizeof(tempAResult));
+		double tempAResult[MAX_ROWS][MAX_COLUMNS];
+		memset(tempAResult, 0, sizeof(double) * (MAX_ROWS * MAX_COLUMNS));
 
 		if ((doMatrixMult(&(tempA[0][0]), &(tempAResult[0][0]))) == 1) {
 			fprintf(stderr, "Matrix Multiplication with stdin args failed.\n");
@@ -357,7 +357,7 @@ int readAMatrix() {
 		}
 
 		matrixSize += PRODUCT;
-		int *tempResultArray = (int *)realloc(finalResultantMatrix, matrixSize * sizeof(int));
+		double *tempResultArray = (double *)realloc(finalResultantMatrix, matrixSize * sizeof(double));
 		if (tempResultArray == NULL) {
 			fprintf(stderr, "realloc() failed for matrix %s.", aMatrixFile);
 			matrixSize -= PRODUCT;
@@ -378,8 +378,8 @@ int readAMatrix() {
  *
  * @param tempResult The array whose values are to be appended.
  **/
-void appendToResultant(int *tempResult) {
-	int *resultStart = finalResultantMatrix + (matrixSize - PRODUCT);
+void appendToResultant(double *tempResult) {
+	double *resultStart = finalResultantMatrix + (matrixSize - PRODUCT);
 	for (int i = 0; i < PRODUCT; ++i) {
 		*(resultStart + i) = *(tempResult + i);
 	}
@@ -397,7 +397,7 @@ void appendToResultant(int *tempResult) {
  * @param product Matrix in which the dot product will be stored. Must be of size 1x8.
  *
  **/
-void rowSum(const int *matrix1, const int *matrix2, int *product, const int row) {
+void rowSum(const double *matrix1, const double *matrix2, double *product, const int row) {
 	// Calculates the row to be multiplied.
 	const int rowStart = row * MAX_ROWS;
 
@@ -449,7 +449,7 @@ void rowSum(const int *matrix1, const int *matrix2, int *product, const int row)
  * @param resultant: The resultant matrix to be filled.
  *
  **/
-void fillRow(const int row, const int *sourceMatrix, int *resultant) {
+void fillRow(const int row, const double *sourceMatrix, double *resultant) {
 	const int rowStart = row * MAX_ROWS;
 	for (int i = 0; i < MAX_COLUMNS; ++i) {
 		*(resultant + (rowStart + i)) = *(sourceMatrix + i);
@@ -466,7 +466,7 @@ void fillRow(const int row, const int *sourceMatrix, int *resultant) {
  * @return
  *
  **/
-int closeAll(FILE *A, FILE *W, int *toFreeArray) {
+int closeAll(FILE *A, FILE *W, double *toFreeArray) {
 	fflush(stdout);
 	fflush(stderr);
 
@@ -498,12 +498,12 @@ int closeAll(FILE *A, FILE *W, int *toFreeArray) {
  * @param resultant The array whose values are to be printed.
  * @param size Size of the array.
  **/
-void printArr(const int *resultant, const int size) {
+void printArr(const double *resultant, const int size) {
 	for (int i = 0; i < size; ++i) {
 		if ((i != 0) && (i % MAX_COLUMNS == 0)) {
 			fprintf(stdout, "\n");
 		}
-		fprintf(stdout, "%d ", *(resultant + i));
+		fprintf(stdout, "%.2f ", *(resultant + i));
 	}
 	fprintf(stdout, "]\n");
 }

@@ -116,6 +116,7 @@ int main(int argc, char* argv[])
     fprintf(stdout, "R = [ \n");
     printArr(finalResultantMatrix, matrixSize);
     free(finalResultantMatrix);
+    finalResultantMatrix = NULL;
 
     // Flush stdout and stderr to their respective file descriptors immediately.
     fflush(stdout);
