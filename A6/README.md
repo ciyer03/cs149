@@ -1,16 +1,13 @@
-# **MatrixMultiWA**
+# **MatrixMultiWA Threaded**
 
 ## Authors: Chandramouli Iyer and Safiullah Saif
 ## Author Emails: chandramouli.iyer@sjsu.edu , safiullah.saif@sjsu.edu
-## Date Last Modified: November 24th, 2023
+## Date Last Modified: December 6th, 2023
 
 
 ## Description
 In the C Standard Library, there are no routines for multiplying two matrices. This 
-program aims to bridge that gap. Unlike the previous one, this program accomplishes the 
-same thing in parallel, but now also has the ability to accept multiple A matrices as 
-arguments, which will all run in parallel, in corresponding number of child processes.
-Furthermore, this program can take inputs from stdin.
+program aims to bridge that gap. This program achieves the same in a multithreaded fashion.
 
 This program taken in an input matrix and as many W matrices as CLI arguments. It multiplies
 each W matrix with the supplied A matrix in a parallel manner. After that, the program 
@@ -18,7 +15,7 @@ would ask for input from stdin for more files. It would pass this file to each c
 which would carry out matrix multiplication with the supplied file, and the W matrix that was
 supplied previously. It would store all results in a dynamically allocated array which expands
 as files are passed in. The program would again ask for more files, and the process continues 
-until the user presses Ctrl+D. After input is finished, each each child's specific reuslt is 
+until the user presses Ctrl+D. After input is finished, each each child's specific result is 
 written to its PID.out file where PID is the PID of the child process.
 
 
@@ -32,16 +29,16 @@ file to PID.err and quit.
 ## Installation
 Step 1: Clone this repo locally: git clone -b master https://bitbucket.org/ciyer17/cs149 cs149_chandramouli_iyer
 
-Step 2: Inside the cs149_chandramouli_iyer directory, navigate into the A5 directory.
+Step 2: Inside the cs149_chandramouli_iyer directory, navigate into the A6 directory.
 
 Step 3: Compile two programs: <br />
 gcc -o matrixmult_multiwa.o matrixmult_multiwa.c <br />
-gcc -o matrixmult_parallel.o matrixmult_parallel.c <br />
+gcc -D_REENTRANT -pthread -o matrixmult_threaded.o matrixmult_threaded.c <br />
 
 You should have two executables: <br />
-matrixmult_multiwa.o and matrixmult_parallel.o <br />
+matrixmult_multiwa.o and matrixmult_threaded.o <br />
 
-Make sure that the matrixmult_parallel executable is exactly named as given.
+Make sure that the matrixmult_threaded executable is exactly named as given.
 
 
 ## Usage
@@ -284,11 +281,12 @@ Enter file path of an A Matrix (Ctrl+D to exit): <br />
 
 results in the following time output: <br />
 
-Run time: 0.001994 secs <br />
+Run time: 0.000977 secs <br />
 
-Run time: 0.001946 secs <br />
+Run time: 0.000853 secs <br />
 
-Run time: 0.002143 secs <br />
+Run time: 0.000941 secs <br />
 
-which averages out to approx 0.002028 secs per run. This can vary based upon number of inputs and compiler 
+which averages out to approx 0.000924 secs per run. This can vary based upon number of inputs,
+number of cores and threads on the CPU, current CPU governor, the CPU itself, and compiler
 optimizations (like -O3).
