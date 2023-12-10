@@ -32,6 +32,8 @@
 int input[MAX_ROWS][MAX_COLUMNS];	// Matrix of size 8x8. The input matrix.
 int weights[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8 The weights matrix.
 int *finalResultantMatrix;
+char **allPassedAFiles;
+int aFileCount;
 int matrixSize;
 
 void fillMatrix(int *resultantMatrix, const int rows, const int columns, FILE *file);
@@ -40,7 +42,7 @@ int readAMatrix();
 void appendToResultant(int *tempResult);
 void rowSum(const int *matrix1, const int *matrix2, int *product, const int row);
 void fillRow(const int row, const int *sourceMatrix, int *resultant);
-int closeAll(FILE *A, FILE *W, int *toFreeArray);
+int closeAll(FILE *A, FILE *W, int *toFreeArray, char **allAFiles);
 void printArr(const int *resultant, const int size);
 
 int main(int argc, char *argv[]) {
@@ -70,41 +72,58 @@ int main(int argc, char *argv[]) {
 		}
 
 		fprintf(stderr, "Terminating, exit code 1.\n");
-		exit(closeAll(A, W, finalResultantMatrix));
+		exit(closeAll(A, W, NULL, NULL));
 	}
 
 	fillMatrix(&(input[0][0]), MAX_ROWS, MAX_COLUMNS, A);
 	fillMatrix(&(weights[0][0]), MAX_ROWS, MAX_COLUMNS, W);
 
+	allPassedAFiles = (char **) malloc(sizeof(char *));
+	if (allPassedAFiles == NULL) {
+		fprintf(stderr, "Memory allocation failed for storing A matrix file names.\n");
+		exit(closeAll(A, W, NULL, NULL));
+	}
+	allPassedAFiles[++aFileCount - 1] = strdup(argv[1]);
+
 	finalResultantMatrix = (int *)malloc(PRODUCT * sizeof(int));
 	if (finalResultantMatrix == NULL) {
 		fprintf(stderr,
-		        "Memory allocation failed. Refer to prior messages for exact "
-		        "details. A matrix %s, W matrix %s.",
+		        "Memory allocation failed for files A matrix %s, W matrix %s.",
 		        argv[1], argv[2]);
-		exit(closeAll(A, W, finalResultantMatrix));
+		exit(closeAll(A, W, NULL, allPassedAFiles));
 	}
 	matrixSize += PRODUCT;
 
 	int tempResultant[MAX_ROWS][MAX_COLUMNS];
 	if (doMatrixMult(&(input[0][0]), &(tempResultant[0][0])) == 1) {
 		fprintf(stderr, "Matrix Multiplication with CLI args failed.\n");
-		exit(closeAll(A, W, finalResultantMatrix));
+		exit(closeAll(A, W, finalResultantMatrix, allPassedAFiles));
 	}
 
 	appendToResultant(&tempResultant[0][0]);
 
 	if (readAMatrix() == 1) {
 		fprintf(stderr, "Matrix Multiplication with passed in A matrix failed.\n");
-		exit(closeAll(A, W, finalResultantMatrix));
+		exit(closeAll(A, W, finalResultantMatrix, allPassedAFiles));
 	}
 
-	fprintf(stdout, "A = %s\n", argv[1]);
-	fprintf(stdout, "W = %s\n", argv[2]);
+	fprintf(stdout, "A = ");
+	for (int i = 0; i < aFileCount; i++) {
+		fprintf(stdout, "%s ", allPassedAFiles[i]);
+	}
+	
+	fprintf(stdout, "\nW = %s\n", argv[2]);
 	fprintf(stdout, "R = [ \n");
 	printArr(finalResultantMatrix, matrixSize);
 	free(finalResultantMatrix);
     finalResultantMatrix = NULL;
+
+	for (int i = 0; i < aFileCount; i++) {
+		free(allPassedAFiles[i]);
+        allPassedAFiles[i] = NULL;
+	}
+	free(allPassedAFiles);
+	allPassedAFiles = NULL;
 
 	// Flush stdout and stderr to their respective file descriptors immediately.
 	fflush(stdout);
@@ -113,7 +132,7 @@ int main(int argc, char *argv[]) {
 	// Reset stdout to the terminal
 	if (dup2(atoi(argv[3]), STDOUT_FILENO) == -1) {
 		fprintf(stderr, "Error redirecting stdout to terminal.\n");
-		exit(closeAll(A, W, finalResultantMatrix));
+		exit(closeAll(A, W, NULL, NULL));
 	}
 
 	// Close the files after use to prevent memory leaks.
@@ -343,13 +362,21 @@ int readAMatrix() {
 			return 1;
 		}
 
+		char **tempAllAFiles = (char **) realloc(allPassedAFiles, (sizeof(char *) * ++aFileCount));
+		if (tempAllAFiles == NULL) {
+			fprintf(stderr, "realloc() failed while allocating space for stdin A file %s.\n", aMatrixFile);
+			return 1;
+		}
+		allPassedAFiles = tempAllAFiles;
+		allPassedAFiles[aFileCount - 1] = strdup(aMatrixFile);
+
 		int tempA[MAX_ROWS][MAX_COLUMNS];
-		memset(tempA, 0, sizeof(tempA));
+		memset(tempA, 0, sizeof(int) * PRODUCT);
 
 		fillMatrix(&(tempA[0][0]), MAX_ROWS, MAX_COLUMNS, aMatrix);
 
 		int tempAResult[MAX_ROWS][MAX_COLUMNS];
-		memset(tempAResult, 0, sizeof(tempAResult));
+		memset(tempAResult, 0, sizeof(int) * PRODUCT);
 
 		if ((doMatrixMult(&(tempA[0][0]), &(tempAResult[0][0]))) == 1) {
 			fprintf(stderr, "Matrix Multiplication with stdin args failed.\n");
@@ -462,11 +489,12 @@ void fillRow(const int row, const int *sourceMatrix, int *resultant) {
  * @param A The input file to be closed.
  * @param W The weights file to be closed.
  * @param toFreeArray The dynamically allocated array to be freed.
- *
+ * @param allAFiles The dynamically allocated array, which contains all passed in A
+ *                  files, to be freed.
  * @return
  *
  **/
-int closeAll(FILE *A, FILE *W, int *toFreeArray) {
+int closeAll(FILE *A, FILE *W, int *toFreeArray, char **allAFiles) {
 	fflush(stdout);
 	fflush(stderr);
 
@@ -485,6 +513,17 @@ int closeAll(FILE *A, FILE *W, int *toFreeArray) {
 	if (toFreeArray != NULL) {
 		free(toFreeArray);
 		toFreeArray = NULL;
+	}
+
+	// Free allocated memory
+	if (allAFiles != NULL) {
+		for (int  i = 0; i < aFileCount; i++) {
+			free(allAFiles[i]);
+            allAFiles[i] = NULL;
+		}
+		
+		free(allAFiles);
+		allAFiles = NULL;
 	}
 
 	return 1;

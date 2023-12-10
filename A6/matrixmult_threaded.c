@@ -33,6 +33,8 @@
 int input[MAX_ROWS][MAX_COLUMNS];   // Matrix of size 8x8. The input matrix.
 int weights[MAX_ROWS][MAX_COLUMNS]; // Matrix of size 8x8 The weights matrix.
 int *finalResultantMatrix;
+char **allPassedAFiles;
+int aFileCount;
 int matrixSize;
 pthread_mutex_t writeToRMutex;
 
@@ -45,7 +47,7 @@ void appendToResultant(int *tempResult);
 void rowSum(const int *matrix1, const int *matrix2, int *product, const int row,
             const int column);
 void fillRow(const int row, const int *sourceMatrix, int *resultant);
-int closeAll(FILE *A, FILE *W, int *toFreeArray, pthread_mutex_t *mutex);
+int closeAll(FILE *A, FILE *W, int *toFreeArray, char **allAFiles, pthread_mutex_t *mutex);
 void printArr(const int *resultant, const int size);
 
 typedef struct MatrixData
@@ -88,11 +90,18 @@ int main(int argc, char *argv[])
         }
 
         fprintf(stderr, "Terminating, exit code 1.\n");
-        exit(closeAll(A, W, finalResultantMatrix, NULL));
+        exit(closeAll(A, W, NULL, NULL, NULL));
     }
 
     fillMatrix(&(input[0][0]), MAX_ROWS, MAX_COLUMNS, A);
     fillMatrix(&(weights[0][0]), MAX_ROWS, MAX_COLUMNS, W);
+
+    allPassedAFiles = (char **) malloc(sizeof(char *));
+	if (allPassedAFiles == NULL) {
+		fprintf(stderr, "Memory allocation failed for storing A matrix file names.\n");
+		exit(closeAll(A, W, NULL, NULL, NULL));
+	}	
+	allPassedAFiles[++aFileCount - 1] = strdup(argv[1]);
 
     finalResultantMatrix = (int *)malloc(PRODUCT * sizeof(int));
     if (finalResultantMatrix == NULL)
@@ -101,7 +110,7 @@ int main(int argc, char *argv[])
                 "Memory allocation failed. Refer to prior messages for exact "
                 "details. A matrix %s, W matrix %s.",
                 argv[1], argv[2]);
-        exit(closeAll(A, W, finalResultantMatrix, NULL));
+        exit(closeAll(A, W, NULL, allPassedAFiles, NULL));
     }
     matrixSize += PRODUCT;
 
@@ -109,22 +118,33 @@ int main(int argc, char *argv[])
     if (calcResult(&(input[0][0]), &(weights[0][0]), finalResultantMatrix) == 1)
     {
         fprintf(stderr, "Matrix Multiplication with CLI args failed.\n");
-        exit(closeAll(A, W, finalResultantMatrix, &writeToRMutex));
+        exit(closeAll(A, W, finalResultantMatrix, allPassedAFiles, &writeToRMutex));
     }
 
     if (readAMatrix() == 1)
     {
         fprintf(stderr, "Matrix Multiplication with passed in A matrix failed.\n");
-        exit(closeAll(A, W, finalResultantMatrix, &writeToRMutex));
+        exit(closeAll(A, W, finalResultantMatrix, allPassedAFiles, &writeToRMutex));
     }
     pthread_mutex_destroy(&writeToRMutex);
 
-    fprintf(stdout, "A = %s\n", argv[1]);
-    fprintf(stdout, "W = %s\n", argv[2]);
+    fprintf(stdout, "A = ");
+	for (int i = 0; i < aFileCount; i++) {
+		fprintf(stdout, "%s ", allPassedAFiles[i]);
+	}
+    
+    fprintf(stdout, "\nW = %s\n", argv[2]);
     fprintf(stdout, "R = [ \n");
     printArr(finalResultantMatrix, matrixSize);
     free(finalResultantMatrix);
     finalResultantMatrix = NULL;
+
+    for (int i = 0; i < aFileCount; i++) {
+		free(allPassedAFiles[i]);
+        allPassedAFiles[i] = NULL;
+	}
+	free(allPassedAFiles);
+	allPassedAFiles = NULL;
 
     // Flush stdout and stderr to their respective file descriptors immediately.
     fflush(stdout);
@@ -134,7 +154,7 @@ int main(int argc, char *argv[])
     if (dup2(atoi(argv[3]), STDOUT_FILENO) == -1)
     {
         fprintf(stderr, "Error redirecting stdout to terminal.\n");
-        exit(closeAll(A, W, finalResultantMatrix, NULL));
+        exit(closeAll(A, W, NULL, NULL, NULL));
     }
 
     // Close the files after use to prevent memory leaks.
@@ -362,8 +382,17 @@ int readAMatrix()
             return 1;
         }
 
+
+		char **tempAllAFiles = (char **) realloc(allPassedAFiles, (sizeof(char *) * ++aFileCount));
+		if (tempAllAFiles == NULL) {
+			fprintf(stderr, "realloc() failed while allocating space for stdin A file %s.\n", aMatrixFile);
+			return 1;
+		}
+		allPassedAFiles = tempAllAFiles;
+		allPassedAFiles[aFileCount - 1] = strdup(aMatrixFile);
+
         int tempA[MAX_ROWS][MAX_COLUMNS];
-        memset(tempA, 0, sizeof(int) * (MAX_ROWS * MAX_COLUMNS));
+        memset(tempA, 0, sizeof(int) * PRODUCT);
 
         fillMatrix(&(tempA[0][0]), MAX_ROWS, MAX_COLUMNS, aMatrix);
 
@@ -394,12 +423,14 @@ int readAMatrix()
  * @param A The input file to be closed.
  * @param W The weights file to be closed.
  * @param toFreeArray The dynamically allocated array to be freed.
+ * @param allAFiles The dynamically allocated array, which contains all passed in A
+ *                  files, to be freed.
+ * @param mutex The pthread_mutex to be destroyed.
  *
  * @return
  *
  **/
-int closeAll(FILE *A, FILE *W, int *toFreeArray, pthread_mutex_t *mutex)
-{
+int closeAll(FILE *A, FILE *W, int *toFreeArray, char **allAFiles, pthread_mutex_t *mutex) {
     fflush(stdout);
     fflush(stderr);
 
@@ -423,6 +454,16 @@ int closeAll(FILE *A, FILE *W, int *toFreeArray, pthread_mutex_t *mutex)
         free(toFreeArray);
         toFreeArray = NULL;
     }
+
+    if (allAFiles != NULL) {
+		for (int  i = 0; i < aFileCount; i++) {
+			free(allAFiles[i]);
+            allAFiles[i] = NULL;
+		}
+		
+		free(allAFiles);
+		allAFiles = NULL;
+	}
 
     // Destroy resources allocated for the mutex
     if (mutex != NULL)
